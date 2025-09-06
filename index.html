@@ -1,143 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Machine Learning Project</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-
-        /* Navigation Tabs */
-        .tabs {
-            overflow: hidden;
-            background-color: #333;
-        }
-
-        .tabs a {
-            float: left;
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 20px;
-            text-decoration: none;
-            transition: background-color 0.3s;
-        }
-
-        .tabs a:hover {
-            background-color: #575757;
-        }
-
-        .tabs a.active {
-            background-color: #04AA6D;
-        }
-
-        /* Section Styling */
-        section {
-            padding: 20px;
-            display: none; /* Hidden by default */
-        }
-
-        section.active {
-            display: block;
-        }
-
-        h2 {
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>ML Project</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; }
+    .tabs a { padding: 10px; display: inline-block; background: #333; color: white; text-decoration: none; }
+    .tabs a.active { background: #04AA6D; }
+    section { display: none; padding: 20px; }
+    section.active { display: block; }
+  </style>
 </head>
 <body>
 
-    <!-- Navigation Tabs -->
-    <div class="tabs">
-        <a href="#introduction" class="active">Introduction</a>
-        <a href="#conclusions">Conclusions</a>
-        <a href="#dataprep">DataPrep_EDA</a>
-        <a href="#clustering">Clustering</a>
-        <a href="#pca">PCA</a>
-        <a href="#naivebayes">NaiveBayes</a>
-        <a href="#dectrees">DecTrees</a>
-        <a href="#svms">SVMs</a>
-        <a href="#regression">Regression</a>
-        <a href="#nn">NN</a>
-    </div>
+<div class="tabs">
+  <a href="#intro" class="active">Introduction</a>
+  <a href="#conclusion">Conclusion</a>
+</div>
 
-    <!-- Page Sections -->
-    <section id="introduction" class="active">
-        <h2>Introduction</h2>
-        <p>Brief overview of the project, dataset, and goals.</p>
-    </section>
+<section id="intro" class="active">
+  <h1>Welcome to the ML Project</h1>
+  <p>This is the introduction section.</p>
+</section>
 
-    <section id="conclusions">
-        <h2>Conclusions</h2>
-        <p>Summary of findings, insights, and lessons learned.</p>
-    </section>
+<section id="conclusion">
+  <h1>Conclusions</h1>
+  <p>This is the conclusions section.</p>
+</section>
 
-    <section id="dataprep">
-        <h2>Data Preparation & EDA</h2>
-        <p>Details on how the data was cleaned and explored.</p>
-    </section>
+<script>
+  const links = document.querySelectorAll('.tabs a');
+  const sections = document.querySelectorAll('section');
 
-    <section id="clustering">
-        <h2>Clustering</h2>
-        <p>Clustering methods (e.g., KMeans) and their analysis.</p>
-    </section>
-
-    <section id="pca">
-        <h2>Principal Component Analysis (PCA)</h2>
-        <p>PCA technique and its results.</p>
-    </section>
-
-    <section id="naivebayes">
-        <h2>Naive Bayes</h2>
-        <p>Analysis and evaluation of Naive Bayes model.</p>
-    </section>
-
-    <section id="dectrees">
-        <h2>Decision Trees</h2>
-        <p>Discussion of decision tree models used.</p>
-    </section>
-
-    <section id="svms">
-        <h2>Support Vector Machines (SVMs)</h2>
-        <p>Results and performance of SVM models.</p>
-    </section>
-
-    <section id="regression">
-        <h2>Regression</h2>
-        <p>Regression techniques applied and their results.</p>
-    </section>
-
-    <section id="nn">
-        <h2>Neural Networks</h2>
-        <p>Analysis using neural network models.</p>
-    </section>
-
-    <!-- Optional JavaScript to enable tab switching -->
-    <script>
-        const links = document.querySelectorAll('.tabs a');
-        const sections = document.querySelectorAll('section');
-
-        links.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                // Remove 'active' from all links and sections
-                links.forEach(l => l.classList.remove('active'));
-                sections.forEach(s => s.classList.remove('active'));
-
-                // Add 'active' to the clicked tab and corresponding section
-                const targetId = this.getAttribute('href').substring(1);
-                document.getElementById(targetId).classList.add('active');
-                this.classList.add('active');
-            });
-        });
-    </script>
+  links.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      links.forEach(l => l.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
+      this.classList.add('active');
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.classList.add('active');
+    });
+  });
+</script>
 
 </body>
 </html>
-
