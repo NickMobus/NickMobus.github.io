@@ -12,13 +12,16 @@
 
     /* Navigation Tabs */
     .tabs {
-      overflow: hidden;
+      overflow-x: auto;
+      white-space: nowrap;
       background-color: #333;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .tabs a {
-      float: left;
-      display: block;
+      display: inline-block;
       color: white;
       text-align: center;
       padding: 14px 20px;
