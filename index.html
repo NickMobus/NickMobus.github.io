@@ -503,6 +503,23 @@
         This chart was generated as part of the exploratory data analysis. It shows the temporal distribution 
         of available measurements for key chemical indicators in the BATS dataset.
       </p>
+
+    <h3>
+      Conversion to Monthly Averages
+    </h3>
+    <p>Given the large number of missing values in the two most important features, coupled with monthly averaged nature of the 
+    other data collected, a new dataframe containing monthly averages of each feature was constructed. Below is a chart 
+    showing the temporal distribution of CO2 and alkalinity in monthly average form; this was done to determine what form 
+    of imputation for missing values should be used.
+    </p>
+    <img src="co2_and_alkalinity_with_missing_values.png" 
+         alt="Line chart showing monthly averages of CO2 and Alkalinity measurement from BATS dataset" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">>
+      <p style="font-size: 0.9em; color: #555;">
+    <p>
+      On the basis of these result, data from before 1992 was removed then missing values were imputed with the forward fill 
+      and backward fill methods to preserve local temporal trends in the data.
+    </p>
   </section>
 
   <section id="clustering">
