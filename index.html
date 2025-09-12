@@ -122,7 +122,13 @@
   <section id="dataprep">
     <h2>Data Preparation & EDA</h2>
     <p>Details on data cleaning, feature engineering, and exploratory data analysis (EDA).</p>
-
+    <p>
+      The following data on global average suface level atmospheric CO2 concentrations were obtained via API. The specific 
+      API was obtained from PhilippSchmitt's ppm GitHub repository, found at 
+      <a href="https://github.com/philippschmitt/ppm?utm_source=chatgpt.com">philippschmitt/ppm</a>; specifically, 
+      the data obtained were the globally averaged marine surface monthly trend data, which was drawn from the 
+      <a href="https://gml.noaa.gov/ccgg/trends/gl_data.html">NOAA Trends in Atmospheric Carbon Dioxide</a>.
+    </p>
     <h2>Raw vs Parsed CO₂ Data</h2>
 
       <div style="margin-bottom: 2rem;">
@@ -139,7 +145,13 @@
           <tbody></tbody>
         </table>
       </div>
-
+      <p>
+        In addition to this data, which is intended primarily to be used to compare local conditions to global averages, 
+        a more comprehensive, localized dataset pertaining to multiple measures of oceanic chemistry in the vicinity of 
+        the Sargasso Sea from October 1988 through December 2024, known as the <a href="https://erddap.bco-dmo.org/erddap/info/bcodmo_dataset_3782_v8/index.html">
+          Bermuda Atlantic Time-series Study (BATS)</a> was obtained. An image of the head of the obtained csv is not 
+        included, due to the volume of included features.
+      </p>
     
   </section>
 
