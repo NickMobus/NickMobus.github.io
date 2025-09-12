@@ -725,6 +725,43 @@
     </tr>
   </tbody>
 </table>
+
+    <p>
+      Using the aggregated and cleaned data, the following EDA visualizations were constructed to explore potential 
+      relationships within features.
+    </p>
+    
+      <h3>Exploratory Chart: Feature Pairplot</h3>
+      <img src="feature_pairplot.png" 
+         alt="Bar chart showing annual CO2 and Alkalinity measurement counts from BATS dataset" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">>
+      <p style="font-size: 0.9em; color: #555;">
+        This chart is an aggregated pairplot of all the features within the dataset. This can be useful to show any 
+        possible one-to-one relationships between the features; this can be useful in helping to decide if some cluster 
+        analysis could potentially link two or more variables.
+      </p>
+
+      
+      <h3>Exploratory Chart: Correlation heatmap</h3>
+      <img src="correlation_heatmap.png" 
+         alt="Bar chart showing annual CO2 and Alkalinity measurement counts from BATS dataset" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">>
+      <p style="font-size: 0.9em; color: #555;">
+        This chart is a correlation heatmap. Similar to the feature pairplot, this explores the pairwise linear correlation 
+        between features. This can indicate the strength of linear relationships between variables, which can be used as a 
+        useful starting point during regression analysis.
+      </p>
+
+      
+      <h3>Exploratory Chart: Annual Boxplots of CO2 Distributions</h3>
+      <img src="co2_annual_boxplot.png" 
+         alt="Bar chart showing annual CO2 and Alkalinity measurement counts from BATS dataset" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">>
+      <p style="font-size: 0.9em; color: #555;">
+        This chart shows the annual distribution of CO2 concentration over the course of the total time frame the data 
+        covers. This can help to illustrate underlying trends in the variance of the feature over time, which isn't visible 
+        simply by looking at the raw monthly average values.
+      </p>
     
   </section>
 
