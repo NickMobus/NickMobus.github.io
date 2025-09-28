@@ -1112,7 +1112,88 @@
 
   <section id="pca">
     <h2>Principal Component Analysis (PCA)</h2>
-    <p>PCA used for dimensionality reduction and visualization of high-dimensional data.</p>
+    <h3>Overview</h3>
+    <p>Principal Component Analysis (usually abbreviated to PCA) is a technique for transforming datasets that allows for 
+    reducing the dimensionality of the data with minimal loss of information. The central concept revolves around the use 
+    of eigenvalues and eigenvectors; at their core, an eigenvector is a vector which, when multiplied by the matrix from 
+    which is is derived, acts like a scalar multiplier (specifically, the scalar eigenvalue associated with the 
+    eigenvector). What this means is that a given matrix can be rotated into an eigenspace in which each axis of the space 
+    is represented by one of its eigenvectors, and each point in the original matrix becomes a linear combination of the 
+    eigenvectors. This is useful in the context of dimensionality reduction because rotating the data into this eigenspace 
+    and ordering the eigenvectors (now referred to as "Principal Components") according to the magnitude of their 
+    corresponding eigenvales (which tell us the relative amount of variation within the data each PC is responsible for), 
+    we can determine what number of PCs we need to account for the majority of the variation within our data; by 
+    truncating our data after a sufficient number of PCs have been selected, we can significantly reduce the 
+    dimensionality of our dataset while retaining the majority of the information contained within it.</p>
+    <p>But why is dimensionality reduction even desirable? In the modern world of big data, enormous datasets 
+    comprising thousands or even millions of features exist. The computational power required to operate on these raw 
+    datasets is staggering, and the time constraints associated with such operations frequently exorbitant. Reducing the 
+    dimensionality of these datasets through PCA allows us to preserve the majority of the information contained in the 
+    data, while reducing the computational load of working with the data. Additionally, high-dimensional data can be 
+    difficult to work with in terms of analysis and visualization; while most people are able to visualize and understand 
+    2-Dimensional data, and many can even extend to 3- or 4-Dimensional data, it becomes difficult to impossible to 
+    effectively visualize and understand data of higher dimensions. PCA can allow us to create simpler, lower dimension 
+    visualizations in ways that can aid comprehension at every step of the data science pipeline, even beginning with EDA.
+    </p>
+    <h3>Data Prep</h3>
+    <p>PCA requires data be numeric, given that it is a mathematical transformation that rotates the data within an 
+    n-dimensional vector space. The majority of my data was already in either float or integer form; the only feature not 
+    already in this form was the date-time column. This was simplified to a simple integer year column for the purposes 
+    of PCA. Addtionally, data of significantly different scales is not well-suited to PCA, with larger scaled features 
+    tending to have outsized impacts on the outcomes of PCA. To this end, data needs to be scaled in such a way that 
+    preserves the spread of the data while standardizing the scale. Several algorithms for this exist, but in this instance
+    the StandardScalar method from the sklearn library was used. This method is the same as that used in the clustering 
+    segement of this project; to avoid duplication of information, the head of the scaled data table can be found on 
+    the clustering tab.</p>
+    <h3>Code</h3>
+    <a href="http://">Here is a link to code used for PCA.</a>
+    <h3>Results</h3>
+    <p>Under ideal circumstances, PCA allows for the easy selection of a level of truncation, i.e. how many PCs to select 
+    which retian the majority of the information (in the form of variance) contained within the data. In such circumstances, 
+    the standard practice is to plot the relative or cumalitive variance against the number or principal components and 
+    look for a clear elbow. Such plots often look like this:</p>
+    <img src="pca_variance_example.png" 
+         alt="Two Versions of Scree Plots for Determining Truncation Threshold" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This plot shows two example versions of scree plots with clear elbows denoting good truncation points. Courtesy 
+        of lecture code from Dr. Osita Onyejekwe.
+      </p>
+    <p>Unfortunately for me, my dataset does not lend itself easily to such truncation methods. As you can see from the plot 
+    below, the variation in my data doesn't cleanly organize itself into a relatively small number of principal components; 
+    instead, the variance accounted for by each PC smoothly increases without truly plateauing. Approximately 80% of the 
+    variance is contained within the first six principal components, but to reach a threshold of 95% of variance I would need 
+    to retain 10 of the 16 total PCs. The first two PCs account for nearly 60% of the variance in the data, which is sufficient
+     for the puposes of data visualization and exploration, but cannot be relied on for rigorous analysis or modeling. Given 
+    the decrease in ease of interpretation of the relationship between model inputs and outputs when PCA is used for feature 
+    reduction, it may be prudent to avoid using transformed data for further analysis of this dataset.</p>
+    <img src="pca_variance_explained.png" 
+         alt="Scree Plot of Explained Variance with 95% Threshold Line" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This plot shows both the individual variances explained by PCs, as well as the cumulative variance explained..
+      </p>
+    <p>Given the primary initial motivation of this project relates primarily to the relationship between dissolved CO2 and 
+    ocean acidification, several scatterplots of PC1 vs PC2 were generated with data points colored according to original values 
+    of one feature or another, including dissolved CO2 and Alkalinity.</p>
+    <img src="pca_scatter_pc1_pc2_by_co2.png" 
+         alt="PC1 vs PC2 Colored by CO2" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This plot shows the scatterplot of PC1 vs PC2 with data points colored accoring to their original values of dissolved 
+        CO2.
+      </p>
+    <img src="pca_scatter_pc1_pc2_by_alkalinity.png" 
+         alt="PC1 vs PC2 Colored by Alkalinity" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This plot shows the scatterplot of PC1 vs PC2 with data points colored accoring to their original values of alkalinity.
+      </p>
+    <p>It's interesting to note that the pattern observed regarding the clustering of data points by time is also present 
+    and recapitulated when comparing dissolved CO2 and alkalinity. While the total explained variance contained in PC1 and PC2 
+    together isn't sufficient for robust data analysis, it does serve well for the purposes of crude exploration of the data, 
+    and provides further evidence for some kind of threshold event partitioning the data into two distinct clusters. Further 
+    analysis and research will hopefully uncover what this event may have been.</p>
   </section>
 
   <section id="naivebayes">
