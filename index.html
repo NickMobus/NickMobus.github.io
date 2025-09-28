@@ -767,7 +767,49 @@
 
   <section id="clustering">
     <h2>Clustering</h2>
-    <p>Unsupervised learning methods like KMeans or DBSCAN and their interpretation.</p>
+    <h3>Overview</h3>
+    <p>Clustering, generally, is a family of unsupervised learning algorithms which seek to uncover underlying 
+    patterns within a dataset by partitioning it into sections or "clusters". Traditional methodologies, such as 
+    K-Means clustering, start by choosing a random (or semi-random) set of points to act as initial centroids 
+    within the data. The Euclidean distance of each point from each centroid is then calculated, and each point is 
+    then assigned to the cluster belonging to the centroid it is closest too. The centroid locations are then 
+    recalculated and placed at the mean of their respective clusters, and the process is iterated again until 
+    no points are reclassified. A notable weakness of this method is that the number of clusters "k" is fixed at 
+    the beginning, and may not be optimal; hyperparameter tuning to find the best value for k is a critical 
+    component of K-Means clustering.</p>
+    <p>A more advanced form of clustering, Heirarchical Clustering, avoids the need to select an initial value for 
+    k. Instead, two versions, called Agglomerative and Divisive Clustering (also called "bottom-up" and "top-down", 
+    respectively) dynamically form clusters, either by starting with each point as a single cluster and adhering 
+    closest clusters together, or by starting with a single cluster and separating it into succesively smaller 
+    clusters. An adavantage of these methods is that the dendrogram produced by the process allows for relatively easy 
+    determination of how and were to determine what the value of k should be.</p>
+    <p>Regardless of which specific clustering algorithm is being used, several techniques are involved in the 
+    hyperparameter tuning to find an optimal value for k. The simplest and easiest to understand is the generation of an 
+    "elbow graph"; a sequence of values for k are used for clustering, and then an "inertia score" (which is a measure 
+    of compactness as given by Within Cluster Sum of Squares or WCSS) is calculated for each and plotted against the 
+    value of k. On the resulting graph an "elbow point" is identified if possible (this is a point where the reduction 
+    in the inertia score by adding 1 to k begins to level out). A more robust method for determining the appropriate 
+    value for k is the use of a Silhouetter Score. This score attempts to assign a value to how well assigned points are 
+    within clusters, and tends to be sensitive to diffusely clustered data or overlapping clusters. In general, while 
+    the elbow method can provide a decent initial starting point, the Silhouetter score tends to be a better metric for 
+    determining an appropriate value for k.</p>
+    <p>Below are images showing and elbow graph and a sillhouette score map.</p>
+    <img src="inertia_elbow.png" 
+         alt="Line Plot of Inertia Scores vs K" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">>
+      <p style="font-size: 0.9em; color: #555;">
+        This chart shows the inertia scores for various values of k during K-Means clustering. This kind of graph would 
+        be used when utilizing the elbow method to determine a good value for k; in this case, the elbow method would 
+        suggest that k=3 would be best.
+      </p>
+    <img src="silhouette_scores.png" 
+         alt="Line Plot of Silhouette Scores vs K" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">>
+      <p style="font-size: 0.9em; color: #555;">
+        This chart shows the silhouette scores for various values of k during K-Means clustering. This kind of graph would 
+        be used as a more robust alternative to the elbow method. In this case, the silhouette score is maximized at k=2, 
+        indicating 2 clusters is probably best for this data.
+      </p>
   </section>
 
   <section id="pca">
