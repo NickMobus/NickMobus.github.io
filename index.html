@@ -1064,6 +1064,50 @@
   </tbody>
 </table>
     <p>Table containing the scaled and cleaned data used for clustering.</p>
+    <h3>Results</h3>
+    <p>Both K-Means and Heirarchical clustering yielded very similar results; while the inertia score elbow graph for 
+    K-Means indicated that k=3 would be optimal, the silhouette score indicated k=2 would be preferable for both K-Means 
+    and Heirarchical clustering (see above for elbow and silhouette graphs of K-Means).</p>
+    <img src="heirarchical_silhouette_scores.png" 
+         alt="Line Plot of Silhouette Scores vs K for Heirarchical Clustering" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This chart shows the silhouette scores for various values of k during heirarchical clustering. This kind of graph 
+        would be used as a more robust alternative to the elbow method. In this case, the silhouette score is maximized 
+        at k=2, indicating 2 clusters is probably best for this data.
+      </p>
+    To illustrate the differences observed in the data when using k=2 vs k=3, a scatter plot of PC1 vs PC2 was generated 
+    with points colored according to their inclusion in a cluster. The graph, show below, fairly dramatically illustrates 
+    why 2 clusters makes more sense for the dataset.
+    <img src="k2_vs_k3_clusters.png" 
+         alt="PC1 vs PC2 Scatterplot with data colored by cluster inclusion" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This graph, which plots the data according to the first and second pricipal components generated with PCA and 
+        coloring the data according to cluster inclusion, clearly demonstrates why k=2 should be preferred over k=3.
+      </p>
+    <p>It's interesting to note that one cluster is significantly larger than the other when examining the dendrogram 
+    generated during heirarchical clustering (see below).</p>
+    <img src="Heirarchical_dendrogram_k2_gray_branches.png" 
+         alt="Heirarchical Clustering Dendrogram with Line Denoting Cutoff for K=2" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This dendrogram, generated during the process of heirarchical clustering, clearly shows that for k=2 one cluster 
+        is significantly larger than the other.
+      </p>
+    <p>Curious to determine what kind of underlying pattern might result in this stark clustering, several data 
+    visualizations were generated to see if something could be discovered; given that the data was generated over a long 
+    period of time, one of these which colored data points according to the year they were generated was created, shown 
+    below:</p>
+    <img src="pca_scatter_pc1_pc2_by_year.png" 
+         alt="PC1 vs PC2 Scatter plot colored by year" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      <p style="font-size: 0.9em; color: #555;">
+        This plot shows the two distinct clusters discovered with cluster analysis colored according to year.
+      </p>
+    <p>Interestingly, it seems that all data points generated BEFORE a certain point belong in one cluster, and all data 
+    points generate AFTER that point belong in the other. This would seem to indicate some kind of threshold event 
+    occured in 2016 which cleanly divides the data into two subsets. What that event may have been remains unclear.</p> 
   </section>
 
   <section id="pca">
