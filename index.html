@@ -1208,7 +1208,7 @@
     <p>In addition to the two primary NB variants, a lesser-used version exists called Bernoulli Naïve Bayes. As the name suggests, Bernoulli NB uses only binary features (such as the presence or absence of a word, 
       rather than a count of how many times the word appears, when building a spam filter). While the Bernoulli NB has useful applications, given the shape of my data I ended up using the Gaussian NB variant.</p>
 
-    <h3>Data Prepe</h3>
+    <h3>Data Prep</h3>
     <p>Given that my primary interest in this data set deals with the relationship between rising CO2 levels and ocean acidification, it seemed natural to choose “Alkalinity” as my target variable. Unfortunately, all of 
       my features are numeric, so the first step in my data cleaning process required that I create categorical labels from this variable. To that end, I created a histogram of the column to determine if there were any 
       naturally occurring categories within the data, and found that the variable was naturally bimodal. On this basis, I split the variable into two categories, “Low Alkalinity” and “High Alkalinity”, and used this 
@@ -1240,6 +1240,9 @@
       <p style="font-size: 0.9em; color: #555;">
         This table shows the head of the testing set.
       </p>
+
+    <h3>Code</h3>
+    <a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/NaiveBayes.ipynb">Here is a link to code used for Naive Bayes.</a>
     
     <h3>Results</h3>
     <p>Overall, Naïve Bayes performed EXTREMELY well with my dataset. The overall accuracy of the algorithm over the testing set was 97.37%, with only two misclassifications, one each false positive and false negative; 
