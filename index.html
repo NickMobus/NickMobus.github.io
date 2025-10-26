@@ -1335,7 +1335,7 @@ So the information gained by this split would be 0.125 bits, which may or may no
       <p style="font-size: 0.9em; color: #555;">
         This is the first decision tree I produced (first three levels).
       </p>
-    <img src="decison_tree_confusion_matrix.png" 
+    <img src="decision_tree_confusion_matrix.png" 
          alt="Decision Tree Confusion Matrix" 
          style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
       <p style="font-size: 0.9em; color: #555;">
@@ -1377,7 +1377,13 @@ So the information gained by this split would be 0.125 bits, which may or may no
       <p style="font-size: 0.9em; color: #555;">
         This is the confusion matrix for my third decision tree classifier.
       </p>
-    
+
+    <h3>Conclusions</h3>
+    <p>The decision trees produced highly consistent results in the prediction of high vs low alkalinity on the basis of the included feature set; this is important, because my initial data exploration found that there 
+      seemed to be a strong temporal component to the levels of alkalinity in the data, with a sharp change occurring in roughly 2016. The date was not included in the feature set fed to the decision tree, which 
+      indicates that indicators besides just the data can be used to accurately predict the alkalinity class. Given the identical performance of the trees, were I to continue using these models in the future I would 
+      choose the third tree produced, on the basis of it’s simplicity and lack of depth; if a shallow tree can perform as well as a deeper tree, it should be preferred. It is interesting to note that the criteria used 
+      to produce this tree were intended originally to produce a deeper tree, but the strong predictive power of the CO2 feature combined with the strictness of the splitting criteria combined to form a shallow tree.</p>
   </section>
 
   <section id="svms">
