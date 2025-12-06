@@ -56,13 +56,15 @@
   <!-- Navigation Tabs -->
   <div class="tabs">
     <a href="#introduction" class="active">Introduction</a>
-    <a href="#conclusions">Conclusions</a>
     <a href="#dataprep">DataPrep_EDA</a>
     <a href="#clustering">Clustering</a>
     <a href="#pca">PCA</a>
     <a href="#naivebayes">NaiveBayes</a>
     <a href="#dectrees">DecTrees</a>
     <a href="#xgboost">XGBoost</a>
+    <a href="#results">Results</a>
+    <a href="#challenges">Challenges</a>
+    <a href="#conclusions">Conclusions</a>
   </div>
 
   <!-- Page Sections -->
@@ -118,26 +120,57 @@
   </figcaption>
 </figure>
   </p>
-  <h3>10 Questions to Answer</h3>
-  <ol>
+  <h3>Q&A</h3>
+  <ul>
     <li>How closely do atmospheric CO2 concentrations correlate with changes in average ocean surface pH over time?</li>
+      <ul>Unfortunately my data did not contain information about pH, just alkalinity; however alkalinity is known to be 
+        closely linked to changes in pH. As such, given the tight relationship between CO2 concentration an alkalinity,
+        it is reasonable to conclude there is likely a negative correlation between CO2 concentrations and ocean surface 
+        pH.
+      </ul>
     <li>How does ocean acidification correlate with declines in specific marine species populations?</li>
+      <ul>Lack of data available relating to specific species population levels at the location made this question 
+        unfortunately impossible to answer.
+      </ul>
     <li>What impact does ocean acidification have on global fishery populations?</li>
+      <ul> When my project scope contracted to be focussed on data drawn from the specific location associated with the 
+        BATS dataset, this question shifted to try to answer the analagous question about that specific location. 
+        Unfortunately, I was unable to acquire data about fishery population over the same time frame as my data, so 
+        answering this question will have to wait for a more narrowly focussed study on the issue.
+      </ul>
     <li>Are there other features in the data which may be predictive of future acidification?</li>
+      <ul> While some of the features included in this study had some minor impacts on the predictive models constructed 
+        here, their impact was dwarfed by that of CO2 concentration. Ultimately, it seems clear that any additional impacts 
+        these features might have on ocean alkalinity (and therefore on ocean acidification) are drowned out by that of 
+        CO2 concentration.
+      </ul>
     <li>Is there a measurable lag between increases in atmospheric CO2 and corresponding changes in ocean pH?</li>
+      <ul> Based on the results of my initial data exploration, it does not seem that there is any significant lag in changes 
+        to alkalinity associated with changes in CO2 concentrations.
+      </ul>
     <li>Is there a link between rising atmospheric CO2 levels and coral reef degradation in the Caribbean?</li>
+      <ul>As with some of the above questions, data could not be found that could be matched to the existing dataset; as such,
+         this question remains unanswered.
+      </ul>
     <li>How do temperature, salinity, and CO2 uptake interact to influence acidification?</li>
+      <ul>Unfortunately this study was unable to uncover any hidden interaction effects of these features; to the best of the 
+        authors knowledge, CO2 appears to be the primary driving factor influencing alkalinity. However, future study might 
+        include models such as ANOVA or multiple regression to address this directly.
+      </ul>
     <li>Are acidification trends more severe near coastal urban centers or areas with high tourism?</li>
+      <ul>The single-location nature of my dataset precluded answering this question in any meaningful way.
+      </ul>
     <li>How have natural carbon sinks in the Caribbean responded to changes in ocean acidity?</li>
+      <ul>No data could be found on such carbon sinks that could be meaningfully associated with my dataset.
+      </ul>
     <li>Do hurricanes and extreme weather events play a role in short-term shift in ocean acidity?</li>
-  </ol>
+      <ul>While I was unable to find data regarding hurricans and how they may have impacted ocean acidity, the large 
+      spike in CO2 concentration that suddenly occurred in 2016 has been, in external literature, strongly linked with the 
+      advent of a strong El Nino event. Given that the relative CO2 levels have still not returned to pre-2016 levels, it 
+      seems clear that yes, indeed, extreme climate events can impact ocean acidity, both in the short- and long-term.</ul>
+  </ul>
 </section>
 
-
-  <section id="conclusions">
-    <h2>Conclusions</h2>
-    <p>This section summarizes key findings, insights, and recommendations based on model results.</p>
-  </section>
 
   <section id="dataprep">
     <h2>Data Preparation & EDA</h2>
@@ -1522,7 +1555,59 @@ So the information gained by this split would be 0.125 bits, which may or may no
     
   </section>
 
+  <section id="results">
+    <h2>Project Results</h2>
+    <p>The following tables summarizes the topline metrics associated with my final models of each top.</p>
+    <figure>
+    <img src="comprehensive_model_comparison.png" 
+         alt="Primary Model Success Metrics" 
+         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+      
+      <p style="font-size: 0.9em; color: #555;">
+        Final model metrcis.
+      </p> 
+    </figure>
+    <p>Overall, all models performed well at their assigned tasks, whether classification or regression. Naive Bayes and
+    the tuned Decision Tree performed identically on the test set.</p>
+  </section>
 
+  <section id="challenges">
+    <h2>Project Challenges</h2>
+    <p>First and foremost, the most difficult aspect of this project was acquiring the necessary data fora analysis. While 
+    some sources, such as the National Oceanic and Atmospheric Administration collects large swathes of data associated with
+    climate change and it's impacts, few if any of them were localized enough or contained the specific features needed to 
+    address the questions I wanted to address. Even after finding the BATS dataset, it proved incredibly difficult to find 
+    data which addressed some of my specific questions (especially those related to connecting CO2 levels and alkalinity to 
+    carbonate-shell forming marine life).</p>
+    
+    <p>Additional challenges, once the data had been acquired, were related to wrangling it into an appropriate form. All of my 
+    primary features were continuous, as was my target variable. As such, the data needed significant massaging to be usable 
+    for most of my models, especially the classification models. I was fortunate that my target variable was very cleanly 
+    bimodal, and could therefore be easily broken into "high" and "low" binary categories, but since this binning was based on 
+    cutoff point specific to this dataset, it dramatically lowers the broader applicability of these models to other locations.</p>
+
+    <p>Finally, broader interpretability of the results of these models has proven challenging. The nature of the data 
+    acquired for this project has necessarily limited our ability to interpret the results of these models in a broader, 
+    more global context. Combined with the lack of many of the most important features necessary to answer most of the 
+    initially proposed research questions, the nature of this project was forced to be reconfigured.</p>
+  </section>
+
+  <section id="conclusions">
+    <h2>Conclusions</h2>
+    <p>Ultimately, I believe the best conclusions can be derived from the results of my XGBoost model. As a regression model,
+     it was able to predict a continuous outcome, which removed the barrier to interpretability created by binning my target 
+    variable. Additionally, any research questions associated with ocean acidification and it's impacts will be primarily 
+    concerned with continuous valued variables, and so the ultimate utility of classification models would be limited. The 
+    final accuracy of the model (as measured by R^2) was sufficiently high (and outperformed a multiple linear regression 
+    model) to warrant further exploration for potential optimization, either through further hyperparameter tuning or the 
+    inclusion of new features.</p>
+
+    <p>In the end, the only strong conclusion that can be drawn from this study is one that is already well understood by 
+    the world at large: increasing the concentration of dissolve carbon dioxide in ocean water reduces the buffering 
+    capacity of the ocean, which in turn can have numerous detrimental impacts on oceanic biomes. Though this result is one 
+    that is already so well-known, replication of results is the heart and soul of the scientific method. As such, this study 
+    stands as solid confirmation of this principle.</p>
+  </section>
 
   <!-- Tab Switching Script -->
   <script>
