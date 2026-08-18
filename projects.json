@@ -1,0 +1,11 @@
+[
+  {
+    "title": "Predicting Ocean Acidification from Atmospheric CO2",
+    "description": "Final project for a Machine Learning course: clustering, PCA, and classification models (Naive Bayes, Decision Trees, XGBoost) applied to 30+ years of BATS oceanographic data to study the link between atmospheric CO2 and ocean alkalinity.",
+    "tags": ["Machine Learning", "Clustering", "XGBoost"],
+    "status": "Complete",
+    "date": "2025",
+    "link": "projects/ocean-acidification/index.html",
+    "external": false
+  }
+]

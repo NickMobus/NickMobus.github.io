@@ -1,2 +1,2 @@
 # NickMobus.github.io
-Machine Learning for DTSC Website
+Hub site for Nick Mobus's various Data Science projects
