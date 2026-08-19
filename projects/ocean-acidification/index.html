@@ -2,68 +2,236 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Machine Learning Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Predicting Ocean Acidification from Atmospheric CO2</title>
+  <meta name="description" content="Final project for a Machine Learning course: clustering, PCA, and classification models (Naive Bayes, Decision Trees, XGBoost) applied to 30+ years of BATS oceanographic data to study the link between atmospheric CO2 and ocean alkalinity." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --paper: #faf9f6;
+      --paper-raised: #ffffff;
+      --ink: #1b1f23;
+      --ink-soft: #5b6470;
+      --hairline: #dedbd2;
+      --accent: #2b6e63;
+      --accent-tint: #e4efec;
+      --accent-ink: #163f38;
+      --font-display: "Source Serif 4", Georgia, serif;
+      --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      --radius: 3px;
+      --wrap: 880px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent-ink); }
+
+    .back-link {
+      display: block;
+      max-width: var(--wrap);
+      margin: 0 auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 14px 24px;
+    }
+    .back-link:hover { color: var(--accent-ink); }
+
+    .report-header {
+      border-bottom: 1px solid var(--hairline);
+      padding: 12px 24px 36px;
+    }
+    .report-header-inner { max-width: var(--wrap); margin: 0 auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin: 0 0 14px;
+      letter-spacing: 0.02em;
+    }
+    .report-header h1 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(1.7rem, 3.6vw, 2.3rem);
+      line-height: 1.25;
+      margin: 0 0 14px;
+      max-width: 32ch;
+    }
+    .byline {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--ink-soft);
       margin: 0;
     }
 
     /* Navigation Tabs */
     .tabs {
-      overflow-x: auto;
-      white-space: nowrap;
-      background-color: #333;
       position: sticky;
       top: 0;
       z-index: 10;
+      background: var(--paper);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 2px 16px;
     }
 
     .tabs a {
       display: inline-block;
-      color: white;
-      text-align: center;
-      padding: 14px 20px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
       text-decoration: none;
+      padding: 10px 10px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
     }
 
     .tabs a:hover {
-      background-color: #575757;
+      color: var(--accent-ink);
     }
 
     .tabs a.active {
-      background-color: #04AA6D;
+      color: var(--accent-ink);
+      border-color: var(--accent);
     }
 
     /* Section Styling */
     section {
       display: none;
-      padding: 20px;
+      max-width: var(--wrap);
+      margin: 0 auto;
+      padding: 40px 24px 56px;
     }
 
     section.active {
       display: block;
     }
 
-    h2 {
-      margin-top: 0;
+    section h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin: 0 0 20px;
+      border-bottom: 1px solid var(--hairline);
+      padding-bottom: 10px;
+    }
+
+    section h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      margin: 32px 0 12px;
+    }
+
+    section p, section li {
+      color: var(--ink-soft);
+      max-width: 74ch;
+    }
+
+    figure {
+      margin: 24px 0;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      background: var(--paper-raised);
+    }
+
+    figcaption {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-top: 8px;
+    }
+
+    table {
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      margin: 16px 0;
+    }
+
+    table.dataframe {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    table th, table td {
+      border: 1px solid var(--hairline);
+      padding: 6px 10px;
+      text-align: right;
+    }
+
+    table thead th {
+      background: var(--accent-tint);
+      color: var(--accent-ink);
+      font-weight: 500;
+    }
+
+    pre {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background: var(--paper-raised);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      padding: 14px;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .formula {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--ink);
+      background: var(--paper-raised);
+      border: 1px solid var(--hairline);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin: 16px 0;
+      line-height: 1.9;
+      overflow-x: auto;
     }
   </style>
 </head>
 <body>
 
+  <a class="back-link" href="../../index.html">&larr; Back to all projects</a>
+
+  <header class="report-header">
+    <div class="report-header-inner">
+      <p class="eyebrow">// machine learning course project</p>
+      <h1>Predicting Ocean Acidification from Atmospheric CO2</h1>
+      <p class="byline">Nick Mobus &middot; Clustering, PCA &amp; classification models on 30+ years of BATS oceanographic data</p>
+    </div>
+  </header>
+
   <!-- Navigation Tabs -->
   <div class="tabs">
     <a href="#introduction" class="active">Introduction</a>
-    <a href="#dataprep">DataPrep_EDA</a>
+    <a href="#dataprep">Data Preparation &amp; EDA</a>
     <a href="#clustering">Clustering</a>
     <a href="#pca">PCA</a>
-    <a href="#naivebayes">NaiveBayes</a>
-    <a href="#dectrees">DecTrees</a>
+    <a href="#naivebayes">Naive Bayes</a>
+    <a href="#dectrees">Decision Trees</a>
     <a href="#xgboost">XGBoost</a>
-    <a href="#results">Results</a>
-    <a href="#challenges">Challenges</a>
+    <a href="#results">Project Results</a>
+    <a href="#challenges">Project Challenges</a>
     <a href="#conclusions">Conclusions</a>
   </div>
 
@@ -71,42 +239,30 @@
   <section id="introduction" class="active">
   <h2>Introduction</h2>
   <p>
-    Climate change is quite possibly the most pressing challenge facing humanity in the modern era. It’s an issue driven 
-    largely by the rapid increase in atmospheric CO2 concentrations driven by anthropogenic sources, such as the burning 
-    of fossil fuels and deforestation. While significant attention has been paid to the more obvious and dramatic effects, 
-    like global warming and extreme weather events, a quieter but equally serious impact of rising CO2 levels is the 
-    increase in ocean acidification. Ocean acidification results from atmospheric CO2 by ocean water, where it is 
-    converted to carbonic acid, resulting in a net decrease in seawater pH.
+    Climate change is one of the most pressing challenges facing humanity today, driven largely by the rapid rise in
+    atmospheric CO2 from fossil fuel combustion and deforestation. Alongside more visible effects like warming and
+    extreme weather, rising CO2 has a quieter but equally serious consequence: ocean acidification. As seawater absorbs
+    atmospheric CO2, it's converted to carbonic acid, lowering ocean pH. This shift threatens organisms that rely on
+    calcium carbonate to build shells and skeletons — corals, shellfish, and the broader marine food webs and
+    biogeochemical cycles (nutrient availability, primary production, carbon sequestration) that depend on them. Coral
+    reefs in particular, among the most biodiverse and acidification-sensitive ecosystems on the planet, risk cascading,
+    community-level disruption as these stressors compound.
   </p>
   <p>
-   Ocean acidification can have significant impact on aquatic ecosystems, especially those with organisms that utilize 
-    calcium carbonate to form essential structures (such as corals and shellfish). As pH level decrease, these organisms 
-    face significant challenges in growing or maintaining these structures, which impacts their ability to survive and 
-    reproduce. Given the crucial role many of these species play in their ecosystems (especially keystone species such as 
-    coral), the impacts on other species can be significant. Understanding how CO2 levels correlate with changes in oceanic 
-    pH is therefore important to predicting and mitigating these broader ecological impacts, as well as the potential 
-    impacts to humans that rely on these ecosystems for food and commerce.
+    These changes carry direct consequences for the people who depend on the ocean. Commercial fisheries and
+    aquaculture — especially operations built around shell-forming species like oysters, clams, and mussels — have
+    already documented losses tied to declining pH and carbonate availability, and the degradation of reef ecosystems
+    threatens the tourism and coastal protection they provide. Understanding how atmospheric CO2 drives these chemical
+    changes is therefore useful not just ecologically, but for anticipating the economic and social challenges ahead.
   </p>
   <p>
-    Beyond its direct effects on calcifying organisms, ocean acidification can also alter fundamental biogeochemical cycles. Changes in carbonate chemistry can influence nutrient availability, trace metal solubility, 
-    and the efficiency of primary production—processes that collectively shape the flow of energy through marine food webs. Even modest shifts in pH can affect how phytoplankton and other microorganisms regulate 
-    metabolic processes, which in turn impacts the broader ecosystem’s ability to sequester carbon. As these feedbacks accumulate, they may amplify or dampen the progression of acidification, making it essential to 
-    understand how chemical markers respond to rising CO₂ levels in real-world ocean environments.
-  </p>
-
-  <p>
-    The consequences of acidification also extend to higher trophic levels, where disruptions in food availability and habitat stability can ripple throughout entire ecosystems. Coral reef systems, for example, support 
-    an extraordinary diversity of species, yet are among the most sensitive to changes in carbonate saturation. As reefs degrade due to combined stresses of warming and acidification, organisms that depend on them, such 
-    as reef fish, crustaceans, and symbiotic algae—face shrinking habitats and declining resources. These ecological shifts can destabilize long-standing community structures and alter predator–prey relationships, 
-    ultimately reducing the resilience of marine ecosystems to additional environmental stressors.
-  </p>
-
-  <p>
-    Human societies that rely on the ocean for food, economic activity, and cultural identity are also at risk from acidification-driven changes. Commercial fisheries and aquaculture operations, particularly those 
-    involving shell-forming species like oysters, clams, and mussels, have already documented losses linked to declining pH levels and carbonate availability. Coastal communities that depend on these industries may face 
-    growing economic uncertainty as acidification intensifies. Moreover, the degradation of iconic marine environments—such as coral reefs—carries significant implications for tourism and coastal protection. 
-    Understanding the chemical pathways that drive ocean acidification is therefore not only critical for predicting ecological responses but also for anticipating the socioeconomic challenges that may emerge in the 
-    decades ahead.
+    This project explores that relationship using real oceanographic data: the Bermuda Atlantic Time-series Study
+    (BATS), a long-running record of ocean chemistry from the Sargasso Sea spanning October 1988 through December
+    2024, paired with global atmospheric CO2 trend data from NOAA. Because the BATS dataset doesn't directly measure
+    pH, alkalinity — a closely related and well-established proxy — was used as the target variable throughout.
+    Clustering, PCA, and a series of classification and regression models (Naive Bayes, Decision Trees, and XGBoost)
+    were applied to characterize how atmospheric CO2 relates to ocean alkalinity at this location, and to see what
+    other patterns the data might reveal along the way.
   </p>
 
 
@@ -120,54 +276,40 @@
   </figcaption>
 </figure>
   </p>
-  <h3>Q&A</h3>
+  <h3>Initial Research Questions</h3>
+  <p>
+    Before diving into modeling, I scoped the project around a set of research questions. Some turned out to be
+    unanswerable with the data I could find — those are covered in Project Challenges — but the ones below got
+    substantive answers and shaped the direction of the analysis.
+  </p>
   <ul>
     <li>How closely do atmospheric CO2 concentrations correlate with changes in average ocean surface pH over time?</li>
-      <ul>Unfortunately my data did not contain information about pH, just alkalinity; however alkalinity is known to be 
-        closely linked to changes in pH. As such, given the tight relationship between CO2 concentration an alkalinity,
-        it is reasonable to conclude there is likely a negative correlation between CO2 concentrations and ocean surface 
+      <ul>My data did not contain information about pH, just alkalinity; however alkalinity is known to be
+        closely linked to changes in pH. As such, given the tight relationship between CO2 concentration and alkalinity,
+        it is reasonable to conclude there is likely a negative correlation between CO2 concentrations and ocean surface
         pH.
       </ul>
-    <li>How does ocean acidification correlate with declines in specific marine species populations?</li>
-      <ul>Lack of data available relating to specific species population levels at the location made this question 
-        unfortunately impossible to answer.
-      </ul>
-    <li>What impact does ocean acidification have on global fishery populations?</li>
-      <ul> When my project scope contracted to be focussed on data drawn from the specific location associated with the 
-        BATS dataset, this question shifted to try to answer the analagous question about that specific location. 
-        Unfortunately, I was unable to acquire data about fishery population over the same time frame as my data, so 
-        answering this question will have to wait for a more narrowly focussed study on the issue.
-      </ul>
     <li>Are there other features in the data which may be predictive of future acidification?</li>
-      <ul> While some of the features included in this study had some minor impacts on the predictive models constructed 
-        here, their impact was dwarfed by that of CO2 concentration. Ultimately, it seems clear that any additional impacts 
-        these features might have on ocean alkalinity (and therefore on ocean acidification) are drowned out by that of 
+      <ul> While some of the features included in this study had some minor impacts on the predictive models constructed
+        here, their impact was dwarfed by that of CO2 concentration. Ultimately, it seems clear that any additional impacts
+        these features might have on ocean alkalinity (and therefore on ocean acidification) are drowned out by that of
         CO2 concentration.
       </ul>
     <li>Is there a measurable lag between increases in atmospheric CO2 and corresponding changes in ocean pH?</li>
-      <ul> Based on the results of my initial data exploration, it does not seem that there is any significant lag in changes 
+      <ul> Based on the results of my initial data exploration, it does not seem that there is any significant lag in changes
         to alkalinity associated with changes in CO2 concentrations.
       </ul>
-    <li>Is there a link between rising atmospheric CO2 levels and coral reef degradation in the Caribbean?</li>
-      <ul>As with some of the above questions, data could not be found that could be matched to the existing dataset; as such,
-         this question remains unanswered.
-      </ul>
     <li>How do temperature, salinity, and CO2 uptake interact to influence acidification?</li>
-      <ul>Unfortunately this study was unable to uncover any hidden interaction effects of these features; to the best of the 
-        authors knowledge, CO2 appears to be the primary driving factor influencing alkalinity. However, future study might 
+      <ul>This study was unable to uncover any hidden interaction effects of these features; to the best of the
+        author's knowledge, CO2 appears to be the primary driving factor influencing alkalinity. However, future study might
         include models such as ANOVA or multiple regression to address this directly.
       </ul>
-    <li>Are acidification trends more severe near coastal urban centers or areas with high tourism?</li>
-      <ul>The single-location nature of my dataset precluded answering this question in any meaningful way.
-      </ul>
-    <li>How have natural carbon sinks in the Caribbean responded to changes in ocean acidity?</li>
-      <ul>No data could be found on such carbon sinks that could be meaningfully associated with my dataset.
-      </ul>
-    <li>Do hurricanes and extreme weather events play a role in short-term shift in ocean acidity?</li>
-      <ul>While I was unable to find data regarding hurricans and how they may have impacted ocean acidity, the large 
-      spike in CO2 concentration that suddenly occurred in 2016 has been, in external literature, strongly linked with the 
-      advent of a strong El Nino event. Given that the relative CO2 levels have still not returned to pre-2016 levels, it 
-      seems clear that yes, indeed, extreme climate events can impact ocean acidity, both in the short- and long-term.</ul>
+    <li>Do hurricanes and extreme weather events play a role in short-term shifts in ocean acidity?</li>
+      <ul>While I was unable to find data regarding hurricanes specifically and how they may have impacted ocean acidity, the large
+      spike in CO2 concentration that suddenly occurred in 2016 has been, in external literature, strongly linked with the
+      advent of a strong El Niño event. Given that the relative CO2 levels have still not returned to pre-2016 levels, it
+      seems clear that yes, indeed, extreme climate events can impact ocean acidity, both in the short- and long-term. This
+      turned out to be one of the more consequential findings of the project — see Conclusions.</ul>
   </ul>
 </section>
 
@@ -244,7 +386,7 @@
     <tr>
       <td>UTC</td>
       <td>m</td>
-      <td>degrees Celsius ( \u00b0C)</td>
+      <td>degrees Celsius (°C)</td>
       <td>dimensionless</td>
       <td>micromoles per kilogram (umol/kg)</td>
       <td>micromoles per kilogram (umol/kg)</td>
@@ -543,7 +685,7 @@
     </tr>
   </tbody>
 </table>
-        <p style="font-size: 0.9em; color: #555;">
+        <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
           This table shows the first 10 rows of the BATS dataset. Columns include measurements like CO₂, alkalinity, 
           depth, salinity, and more.
         </p>
@@ -551,8 +693,8 @@
       <h3>Exploratory Chart: Number of measurements of CO2 and Alkalinity Distributed by Year</h3>
       <img src="eda_co2_alkalinity_by_year.png" 
          alt="Bar chart showing annual CO2 and Alkalinity measurement counts from BATS dataset" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This chart was generated as part of the exploratory data analysis. It shows the temporal distribution 
         of available measurements for key chemical indicators in the BATS dataset.
       </p>
@@ -567,11 +709,14 @@
     </p>
     <img src="co2_and_alkalinity_with_missing_values.png" 
          alt="Line chart showing monthly averages of CO2 and Alkalinity measurement from BATS dataset" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        This chart shows the temporal distribution of CO2 and alkalinity in monthly-average form; the earliest years
+        have long stretches of missing data, which is why records from before 1992 were dropped.
+      </p>
     <p>
-      On the basis of these result, data from before 1992 was removed then missing values were imputed with the forward fill 
-      and backward fill methods to preserve local temporal trends in the data. The head of the resulting dataframe follows: 
+      On the basis of these results, data from before 1992 was removed then missing values were imputed with the forward fill
+      and backward fill methods to preserve local temporal trends in the data. The head of the resulting dataframe follows:
     </p>
 
     <table border="1" class="dataframe">
@@ -785,34 +930,36 @@
     </p>
     
       <h3>Exploratory Chart: Feature Pairplot</h3>
-      <img src="feature_pairplot.png" 
-         alt="Bar chart showing annual CO2 and Alkalinity measurement counts from BATS dataset" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This chart is an aggregated pairplot of all the features within the dataset. This can be useful to show any 
-        possible one-to-one relationships between the features; this can be useful in helping to decide if some cluster 
-        analysis could potentially link two or more variables.
+      <img src="feature_pairplot.png"
+         alt="Pairplot matrix of CO2, Alkalinity, Temperature, Salinity, and Oxygen showing bimodal distributions"
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        This is an aggregated pairplot of the dataset's features, useful for spotting possible one-to-one relationships
+        that might inform cluster analysis. CO2 and Alkalinity both show a visibly bimodal distribution here, and split
+        into two distinct groups against several other features — an early hint of the two-cluster structure that
+        later analysis (see Clustering) traces to a 2016 dividing line.
       </p>
 
-      
+
       <h3>Exploratory Chart: Correlation heatmap</h3>
-      <img src="correlation_heatmap.png" 
-         alt="Bar chart showing annual CO2 and Alkalinity measurement counts from BATS dataset" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This chart is a correlation heatmap. Similar to the feature pairplot, this explores the pairwise linear correlation 
-        between features. This can indicate the strength of linear relationships between variables, which can be used as a 
-        useful starting point during regression analysis.
+      <img src="correlation_heatmap.png"
+         alt="Correlation heatmap of oceanographic and CO2 features"
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        Pairwise linear correlation between features. The strongest relationships are CO2 vs. year (r = 0.91) and CO2
+        vs. Alkalinity (r = -0.83), with Alkalinity also declining over time (r = -0.67 vs. year) — consistent with
+        atmospheric CO2 being the dominant driver of the alkalinity trend.
       </p>
 
-      
+
       <h3>Exploratory Chart: Annual Boxplots of CO2 Distributions</h3>
-      <img src="co2_annual_boxplot.png" 
-         alt="Bar chart showing annual CO2 and Alkalinity measurement counts from BATS dataset" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This chart shows the annual distribution of CO2 concentration over the course of the total time frame the data 
-        covers. This can help to illustrate underlying trends in the variance of the feature over time, which isn't visible 
+      <img src="co2_annual_boxplot.png"
+         alt="Box plot of annual CO2 concentration from 1992 to 2024 showing a steady rise and a 2015-2016 jump"
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        Annual distribution of CO2 concentration over the full time frame the data covers. CO2 rises steadily from the
+        early 1990s onward, with a marked jump in both level and within-year variance beginning around 2015-2016 — the
+        same period flagged as a structural break in the Clustering and PCA analyses. This isn't visible 
         simply by looking at the raw monthly average values.
       </p>
     
@@ -830,35 +977,35 @@
     no points are reclassified. A notable weakness of this method is that the number of clusters "k" is fixed at 
     the beginning, and may not be optimal; hyperparameter tuning to find the best value for k is a critical 
     component of K-Means clustering.</p>
-    <p>A more advanced form of clustering, Heirarchical Clustering, avoids the need to select an initial value for 
+    <p>A more advanced form of clustering, Hierarchical Clustering, avoids the need to select an initial value for 
     k. Instead, two versions, called Agglomerative and Divisive Clustering (also called "bottom-up" and "top-down", 
     respectively) dynamically form clusters, either by starting with each point as a single cluster and adhering 
-    closest clusters together, or by starting with a single cluster and separating it into succesively smaller 
-    clusters. An adavantage of these methods is that the dendrogram produced by the process allows for relatively easy 
-    determination of how and were to determine what the value of k should be.</p>
+    closest clusters together, or by starting with a single cluster and separating it into successively smaller 
+    clusters. An advantage of these methods is that the dendrogram produced by the process allows for relatively easy 
+    determination of how and where to determine what the value of k should be.</p>
     <p>Regardless of which specific clustering algorithm is being used, several techniques are involved in the 
     hyperparameter tuning to find an optimal value for k. The simplest and easiest to understand is the generation of an 
     "elbow graph"; a sequence of values for k are used for clustering, and then an "inertia score" (which is a measure 
     of compactness as given by Within Cluster Sum of Squares or WCSS) is calculated for each and plotted against the 
     value of k. On the resulting graph an "elbow point" is identified if possible (this is a point where the reduction 
     in the inertia score by adding 1 to k begins to level out). A more robust method for determining the appropriate 
-    value for k is the use of a Silhouetter Score. This score attempts to assign a value to how well assigned points are 
+    value for k is the use of a Silhouette Score. This score attempts to assign a value to how well assigned points are 
     within clusters, and tends to be sensitive to diffusely clustered data or overlapping clusters. In general, while 
-    the elbow method can provide a decent initial starting point, the Silhouetter score tends to be a better metric for 
+    the elbow method can provide a decent initial starting point, the Silhouette score tends to be a better metric for 
     determining an appropriate value for k.</p>
-    <p>Below are images showing and elbow graph and a sillhouette score map.</p>
+    <p>Below are images showing an elbow graph and a silhouette score map.</p>
     <img src="inertia_elbow.png" 
          alt="Line Plot of Inertia Scores vs K" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This chart shows the inertia scores for various values of k during K-Means clustering. This kind of graph would 
         be used when utilizing the elbow method to determine a good value for k; in this case, the elbow method would 
         suggest that k=3 would be best.
       </p>
     <img src="silhouette_scores.png" 
          alt="Line Plot of Silhouette Scores vs K" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This chart shows the silhouette scores for various values of k during K-Means clustering. This kind of graph would 
         be used as a more robust alternative to the elbow method. In this case, the silhouette score is maximized at k=2, 
         indicating 2 clusters is probably best for this data.
@@ -1120,14 +1267,14 @@
     <h3>Code</h3>
     <a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/ocean-acidification/clustering_code.ipynb">Here is a link to code used for clustering.</a>
     <h3>Results</h3>
-    <p>Both K-Means and Heirarchical clustering yielded very similar results; while the inertia score elbow graph for 
+    <p>Both K-Means and Hierarchical clustering yielded very similar results; while the inertia score elbow graph for 
     K-Means indicated that k=3 would be optimal, the silhouette score indicated k=2 would be preferable for both K-Means 
-    and Heirarchical clustering (see above for elbow and silhouette graphs of K-Means).</p>
+    and Hierarchical clustering (see above for elbow and silhouette graphs of K-Means).</p>
     <img src="hierarchical_silhouette_scores.png" 
          alt="Line Plot of Silhouette Scores vs K for Hierarchical Clustering" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This chart shows the silhouette scores for various values of k during heirarchical clustering. This kind of graph 
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        This chart shows the silhouette scores for various values of k during hierarchical clustering. This kind of graph 
         would be used as a more robust alternative to the elbow method. In this case, the silhouette score is maximized 
         at k=2, indicating 2 clusters is probably best for this data.
       </p>
@@ -1136,17 +1283,17 @@
     why 2 clusters makes more sense for the dataset.
     <img src="k2_vs_k3_clusters.png" 
          alt="PC1 vs PC2 Scatterplot with data colored by cluster inclusion" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This graph, which plots the data according to the first and second pricipal components generated with PCA and 
         coloring the data according to cluster inclusion, clearly demonstrates why k=2 should be preferred over k=3.
       </p>
     <p>It's interesting to note that one cluster is significantly larger than the other when examining the dendrogram 
-    generated during heirarchical clustering (see below).</p>
+    generated during hierarchical clustering (see below).</p>
     <img src="hierarchical_dendrogram_k2_gray_branches.png" 
          alt="Hierarchical Clustering Dendrogram with Line Denoting Cutoff for K=2" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This dendrogram, generated during the process of hierarchical clustering, clearly shows that for k=2 one cluster 
         is significantly larger than the other.
       </p>
@@ -1156,13 +1303,14 @@
     below:</p>
     <img src="pca_scatter_pc1_pc2_by_year.png" 
          alt="PC1 vs PC2 Scatter plot colored by year" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This plot shows the two distinct clusters discovered with cluster analysis colored according to year.
       </p>
     <p>Interestingly, it seems that all data points generated BEFORE a certain point belong in one cluster, and all data 
     points generate AFTER that point belong in the other. This would seem to indicate some kind of threshold event 
-    occured in 2016 which cleanly divides the data into two subsets. What that event may have been remains unclear.</p> 
+    occurred in 2016 which cleanly divides the data into two subsets. What that event may have been remains unclear
+    (discussed further in the Conclusions).</p> 
   </section>
 
   <section id="pca">
@@ -1171,12 +1319,12 @@
     <p>Principal Component Analysis (usually abbreviated to PCA) is a technique for transforming datasets that allows for 
     reducing the dimensionality of the data with minimal loss of information. The central concept revolves around the use 
     of eigenvalues and eigenvectors; at their core, an eigenvector is a vector which, when multiplied by the matrix from 
-    which is is derived, acts like a scalar multiplier (specifically, the scalar eigenvalue associated with the 
+    which it is derived, acts like a scalar multiplier (specifically, the scalar eigenvalue associated with the 
     eigenvector). What this means is that a given matrix can be rotated into an eigenspace in which each axis of the space 
     is represented by one of its eigenvectors, and each point in the original matrix becomes a linear combination of the 
     eigenvectors. This is useful in the context of dimensionality reduction because rotating the data into this eigenspace 
     and ordering the eigenvectors (now referred to as "Principal Components") according to the magnitude of their 
-    corresponding eigenvales (which tell us the relative amount of variation within the data each PC is responsible for), 
+    corresponding eigenvalues (which tell us the relative amount of variation within the data each PC is responsible for), 
     we can determine what number of PCs we need to account for the majority of the variation within our data; by 
     truncating our data after a sufficient number of PCs have been selected, we can significantly reduce the 
     dimensionality of our dataset while retaining the majority of the information contained within it.</p>
@@ -1194,12 +1342,132 @@
     <p>PCA requires data be numeric, given that it is a mathematical transformation that rotates the data within an 
     n-dimensional vector space. The majority of my data was already in either float or integer form; the only feature not 
     already in this form was the date-time column. This was simplified to a simple integer year column for the purposes 
-    of PCA. Addtionally, data of significantly different scales is not well-suited to PCA, with larger scaled features 
+    of PCA. Additionally, data of significantly different scales is not well-suited to PCA, with larger scaled features 
     tending to have outsized impacts on the outcomes of PCA. To this end, data needs to be scaled in such a way that 
     preserves the spread of the data while standardizing the scale. Several algorithms for this exist, but in this instance
-    the StandardScalar method from the sklearn library was used. This method is the same as that used in the clustering 
-    segement of this project; to avoid duplication of information, the head of the scaled data table can be found on 
-    the clustering tab.</p>
+    the StandardScalar method from the sklearn library was used. This method is the same as that used in the clustering
+    segement of this project.</p>
+    <table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>depth</th>
+      <th>Temperature</th>
+      <th>Salinity</th>
+      <th>Oxygen_1</th>
+      <th>CO2</th>
+      <th>Alkalinity</th>
+      <th>NO3_plus_NO2</th>
+      <th>NO2</th>
+      <th>PO4</th>
+      <th>Silicate</th>
+      <th>POC</th>
+      <th>PON</th>
+      <th>TOC</th>
+      <th>Bact_Enum</th>
+      <th>year</th>
+      <th>CO2_rolling</th>
+      <th>Alkalinity_rolling</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2.363954</td>
+      <td>-2.062336</td>
+      <td>-0.648830</td>
+      <td>0.402820</td>
+      <td>-1.301238</td>
+      <td>0.705674</td>
+      <td>0.976389</td>
+      <td>-0.727995</td>
+      <td>0.950600</td>
+      <td>0.734709</td>
+      <td>-0.954000</td>
+      <td>-1.083280</td>
+      <td>0.890476</td>
+      <td>-0.340071</td>
+      <td>-1.739978</td>
+      <td>-1.179202</td>
+      <td>0.542878</td>
+    </tr>
+    <tr>
+      <td>1.015218</td>
+      <td>-1.358476</td>
+      <td>0.536558</td>
+      <td>-0.088737</td>
+      <td>-1.388716</td>
+      <td>0.667951</td>
+      <td>0.046280</td>
+      <td>-0.670858</td>
+      <td>0.000849</td>
+      <td>-0.144558</td>
+      <td>-0.927366</td>
+      <td>-0.634428</td>
+      <td>0.890476</td>
+      <td>0.223341</td>
+      <td>-1.632438</td>
+      <td>-1.183432</td>
+      <td>0.511969</td>
+    </tr>
+    <tr>
+      <td>-0.186372</td>
+      <td>-0.703887</td>
+      <td>0.480712</td>
+      <td>0.401614</td>
+      <td>-1.174849</td>
+      <td>0.707129</td>
+      <td>-0.384135</td>
+      <td>0.246053</td>
+      <td>-0.121481</td>
+      <td>-0.193684</td>
+      <td>-0.166833</td>
+      <td>0.608294</td>
+      <td>0.890476</td>
+      <td>1.420186</td>
+      <td>-1.632438</td>
+      <td>-1.185090</td>
+      <td>0.607047</td>
+    </tr>
+    <tr>
+      <td>-0.424154</td>
+      <td>-0.722420</td>
+      <td>0.689651</td>
+      <td>0.725123</td>
+      <td>-0.891539</td>
+      <td>0.677781</td>
+      <td>-0.342873</td>
+      <td>0.508642</td>
+      <td>-0.368542</td>
+      <td>-0.549187</td>
+      <td>0.331888</td>
+      <td>0.830068</td>
+      <td>0.890476</td>
+      <td>1.014146</td>
+      <td>-1.632438</td>
+      <td>-1.164693</td>
+      <td>0.614202</td>
+    </tr>
+    <tr>
+      <td>-0.082047</td>
+      <td>-0.630284</td>
+      <td>0.788108</td>
+      <td>0.805409</td>
+      <td>-1.082259</td>
+      <td>0.652544</td>
+      <td>-0.582655</td>
+      <td>-0.201745</td>
+      <td>-0.298202</td>
+      <td>-0.152928</td>
+      <td>-0.056572</td>
+      <td>0.339052</td>
+      <td>0.890476</td>
+      <td>2.143866</td>
+      <td>-1.632438</td>
+      <td>-1.183643</td>
+      <td>0.606168</td>
+    </tr>
+  </tbody>
+</table>
+    <p>Table containing the scaled and cleaned data used for PCA (identical scaling method to the clustering step above).</p>
     <h3>Code</h3>
     <a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/ocean-acidification/PCA.ipynb">Here is a link to code used for PCA.</a>
     <h3>Results</h3>
@@ -1209,8 +1477,8 @@
     look for a clear elbow. Such plots often look like this:</p>
     <img src="pca_variance_example.png" 
          alt="Two Versions of Scree Plots for Determining Truncation Threshold" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This plot shows two example versions of scree plots with clear elbows denoting good truncation points. Courtesy 
         of lecture code from Dr. Osita Onyejekwe.
       </p>
@@ -1219,30 +1487,30 @@
     instead, the variance accounted for by each PC smoothly increases without truly plateauing. Approximately 80% of the 
     variance is contained within the first six principal components, but to reach a threshold of 95% of variance I would need 
     to retain 10 of the 16 total PCs. The first two PCs account for nearly 60% of the variance in the data, which is sufficient
-     for the puposes of data visualization and exploration, but cannot be relied on for rigorous analysis or modeling. Given 
+     for the purposes of data visualization and exploration, but cannot be relied on for rigorous analysis or modeling. Given 
     the decrease in ease of interpretation of the relationship between model inputs and outputs when PCA is used for feature 
     reduction, it may be prudent to avoid using transformed data for further analysis of this dataset.</p>
     <img src="pca_variance_explained.png" 
          alt="Scree Plot of Explained Variance with 95% Threshold Line" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This plot shows both the individual variances explained by PCs, as well as the cumulative variance explained..
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        This plot shows both the individual variances explained by PCs, as well as the cumulative variance explained.
       </p>
     <p>Given the primary initial motivation of this project relates primarily to the relationship between dissolved CO2 and 
     ocean acidification, several scatterplots of PC1 vs PC2 were generated with data points colored according to original values 
     of one feature or another, including dissolved CO2 and Alkalinity.</p>
     <img src="pca_scatter_pc1_pc2_by_co2.png" 
          alt="PC1 vs PC2 Colored by CO2" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This plot shows the scatterplot of PC1 vs PC2 with data points colored accoring to their original values of dissolved 
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        This plot shows the scatterplot of PC1 vs PC2 with data points colored according to their original values of dissolved 
         CO2.
       </p>
     <img src="pca_scatter_pc1_pc2_by_alkalinity.png" 
          alt="PC1 vs PC2 Colored by Alkalinity" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This plot shows the scatterplot of PC1 vs PC2 with data points colored accoring to their original values of alkalinity.
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        This plot shows the scatterplot of PC1 vs PC2 with data points colored according to their original values of alkalinity.
       </p>
     <p>It's interesting to note that the pattern observed regarding the clustering of data points by time is also present 
     and recapitulated when comparing dissolved CO2 and alkalinity. While the total explained variance contained in PC1 and PC2 
@@ -1271,26 +1539,26 @@
       that still exists since the training and testing sets, though disjoint, were originally from the same source.</p>
      <img src="alkalinity_distribution.png" 
          alt="Alkalinity Histogram" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This histogram illustrates the bimodal nature of the Alkalinity feature; this was the basis for splitting it into two categories.
       </p> 
     <img src="dataset_head_with_target.png" 
          alt="Dataset with Categorical Target Variable" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This table shows the head of the dataset, including the Alkalinity column reconfigured to categorical "High" and "Low".
       </p>
      <img src="training_set_head.png" 
          alt="Training Set" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This table shows the head of the training dataset.
       </p>
      <img src="test_set_head.png" 
          alt="Testing Set" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This table shows the head of the testing set.
       </p>
 
@@ -1299,26 +1567,26 @@
     
     <h3>Results</h3>
     <p>Overall, Naïve Bayes performed EXTREMELY well with my dataset. The overall accuracy of the algorithm over the testing set was 97.37%, with only two misclassifications, one each false positive and false negative; 
-      the testing set itself contained a total of 76 observations. The F1 score was also .97. As such, this model seems very capable of accurately predicting oceanic conditions which will indicate either low or high 
+      the testing set itself contained a total of 76 observations. The F1 score was also 0.97. As such, this model seems very capable of accurately predicting oceanic conditions which will indicate either low or high 
       alkalinity. Out of curiosity, I also conducted a feature importance analysis to determine the relative contributions of the features to the model. Unlike decision trees, Naïve Bayes does not have built-in methods 
       for gauging feature importance, so I utilized two related measures: Class Mean Differences, and log Probability Variance. Both methods produced similar results, though log probability variance was more stark; CO2 
-      concentration was far and away the strongest predictor of alkalinity class, with depth a distance second.</p>
+      concentration was far and away the strongest predictor of alkalinity class, with depth a distant second.</p>
      <img src="naive_bayes_confusion_matrix.png" 
          alt="Naive Bayes Confusion Matrix" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This is the confusion matrix for my Naive Bayes classifier.
       </p>
      <img src="naive_bayes_classification_report_table.png" 
          alt="Naive Bayes Classification Report" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This table shows the accuracy, f1 score, precision, and recall of the Naive Bayes classifier.
       </p>
      <img src="naive_bayes_feature_importance_comprehensive.png" 
          alt="Naive Bayes Feature Importance" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         These plots show the relative importance of features to the Naive Bayes classification model.
       </p>
     
@@ -1336,14 +1604,19 @@
       contains the full dataset and is referred to as the root node. From each split we produce either internal decision nodes (at which further splitting occurs) or leaf nodes (at which a classification is assigned to 
       a datapoint). The tree is built by choosing a feature and split threshold that best separates the data into purer subsets; this purity is measured from the information entropy contained within each node, and what 
       is considered “best” is determined by information gain (which is a function of the entropy of the parent and child nodes). As an example: if we possessed a dataset with 10 data points, 6 of which were labelled 
-      “yes” for our target variable and 4 “no”, and our first split produced two child nodes which contained 4 yes, 1 no and 2 yes, 3 no respectively, we would calculate the entropy and information gain as follows:
-I_p=-0.6\cdot\log_20.6-0.4\cdot\log_2{0.}4=0.971\bigmI_{c1}=-0.8\cdot\log_2{0.}8-0.2\cdot\log_2{0.}2=0.722
-I_{c2}=-0.4\cdot\log_2{0.}4-0.6\cdot\log_2{0.}6=0.971
-IG=0.971-\left(0.5\cdot0.722+0.5\cdot0.971\right)=0.125
-So the information gained by this split would be 0.125 bits, which may or may not be optimal compared to other possible splits.
-</p>
+      “yes” for our target variable and 4 “no”, and our first split produced two child nodes which contained 4 yes, 1 no and 2 yes, 3 no respectively, I would calculate the entropy and information gain as follows:
+    </p>
+    <div class="formula">
+      I<sub>p</sub> = &minus;0.6&middot;log&#8322;(0.6) &minus; 0.4&middot;log&#8322;(0.4) = 0.971<br>
+      I<sub>c1</sub> = &minus;0.8&middot;log&#8322;(0.8) &minus; 0.2&middot;log&#8322;(0.2) = 0.722<br>
+      I<sub>c2</sub> = &minus;0.4&middot;log&#8322;(0.4) &minus; 0.6&middot;log&#8322;(0.6) = 0.971<br>
+      IG = 0.971 &minus; (0.5&middot;0.722 + 0.5&middot;0.971) = 0.125
+    </div>
+    <p>
+      So the information gained by this split would be 0.125 bits, which may or may not be optimal compared to other possible splits.
+    </p>
     <p>In principle, because features are often continuous numeric data, an infinite number of potential trees exist; when you have many features to choose from for splitting and a continuous spectrum from which to 
-      choose split points, the options are endless. In practice, we limit splitting by stopping criteria, and our data isn’t truly continuous (finite data points lend themselves to discrete splitting criteria).</p>
+      choose split points, the options are endless. In practice, splitting is limited by stopping criteria, and my data isn’t truly continuous (finite data points lend themselves to discrete splitting criteria).</p>
 
     <h3>Data Prep</h3>
     <p>The data was prepared in similar fashion to the preparation for Naïve Bayes: a categorical variable was constructed from the target variable Alkalinity, based on its bimodal character. I used a stratified split to 
@@ -1353,26 +1626,26 @@ So the information gained by this split would be 0.125 bits, which may or may no
 
     <img src="alkalinity_distribution.png" 
          alt="Alkalinity Histogram" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This histogram illustrates the bimodal nature of the Alkalinity feature; this was the basis for splitting it into two categories.
       </p> 
     <img src="dataset_head_with_target.png" 
          alt="Dataset with Categorical Target Variable" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This table shows the head of the dataset, including the Alkalinity column reconfigured to categorical "High" and "Low".
       </p>
      <img src="training_set_head.png" 
          alt="Training Set" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This table shows the head of the training dataset.
       </p>
      <img src="test_set_head.png" 
          alt="Testing Set" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This table shows the head of the testing set.
       </p>
     
@@ -1384,50 +1657,50 @@ So the information gained by this split would be 0.125 bits, which may or may no
       Similar to the Naïve Bayes classifier, feature importance analysis indicates that the level of CO2 is the single most important predictor of high vs low alkalinity in seawater.</p>
     <img src="decision_tree_visualization.png" 
          alt="First Decision Tree" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This is the first decision tree I produced (first three levels).
       </p>
-    <img src="decision_tree_confusion_matrix.png" 
-         alt="Decision Tree Confusion Matrix" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This is the confusion matrix for myy first decision tree classifier.
+    <img src="decision_tree_confusion_matrix.png"
+         alt="Decision Tree Confusion Matrix"
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        This is the confusion matrix for my first decision tree classifier.
       </p>
-    <img src="naive_bayes_confusion_matrix.png" 
-         alt="Naive Bayes Confusion Matrix" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
-        This is the confusion matrix for my Naive Bayes classifier.
+    <img src="decision_tree_confusion_matrix.png"
+         alt="Decision Tree Confusion Matrix"
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        Confusion matrix for the first decision tree classifier.
       </p>
     <img src="decision_tree_feature_importance.png" 
          alt="Feature Importance" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This is the relative feature importance from my first decision tree.
       </p>
     <img src="all_three_decision_trees.png" 
          alt="All three trees." 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This is the first three layers of all three trees I generated.
       </p>
     <img src="decision_tree_complexity_comparison.png" 
          alt="Tree Complexity Comparison" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         The relative complexity of the three trees generated.
       </p>
     <img src="tuned_tree2_confusion_matrix.png" 
          alt="Second Tree Confusion Matrix" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This is the confusion matrix for my second decision tree classifier.
       </p>
     <img src="tuned_tree3_confusion_matrix.png" 
          alt="Third Tree Confusion Matrix" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This is the confusion matrix for my third decision tree classifier.
       </p>
 
@@ -1435,7 +1708,7 @@ So the information gained by this split would be 0.125 bits, which may or may no
     <p>The decision trees produced highly consistent results in the prediction of high vs low alkalinity on the basis of the included feature set; this is important, because my initial data exploration found that there 
       seemed to be a strong temporal component to the levels of alkalinity in the data, with a sharp change occurring in roughly 2016. The date was not included in the feature set fed to the decision tree, which 
       indicates that indicators besides just the data can be used to accurately predict the alkalinity class. Given the identical performance of the trees, were I to continue using these models in the future I would 
-      choose the third tree produced, on the basis of it’s simplicity and lack of depth; if a shallow tree can perform as well as a deeper tree, it should be preferred. It is interesting to note that the criteria used 
+      choose the third tree produced, on the basis of its simplicity and lack of depth; if a shallow tree can perform as well as a deeper tree, it should be preferred. It is interesting to note that the criteria used 
       to produce this tree were intended originally to produce a deeper tree, but the strong predictive power of the CO2 feature combined with the strictness of the splitting criteria combined to form a shallow tree.</p>
   </section>
 
@@ -1446,8 +1719,8 @@ So the information gained by this split would be 0.125 bits, which may or may no
     <p>Ensemble methods generally, and boosting methods specifically, are machine learning algorithms which compile the results from multiple weak learning algorithms to produce better overall results than individual 
       learning algorithms generally produce on their own. A weak learner, in this context, is a machine learning model that performs slightly better than chance guessing. They are not terribly accurate on their own, 
       but can be combined using ensemble methods to form something stronger. An example of a weak learner would be a decision tree stump.</p> 
-    <p>The ensemble methods we examined, and specifically the model implemented in this project, are referred to as “boosting” methods. They work recursively, constructing an initial weak learner, with the 
-      classifications errors generated by that learner informing the training of the next learner and so on. The three primary boosting methods we’ve discussed are Adaptive Boosting (aka AdaBoost), Gradient Boosting, 
+    <p>The ensemble methods examined here, and specifically the model implemented in this project, are referred to as “boosting” methods. They work recursively, constructing an initial weak learner, with the 
+      classifications errors generated by that learner informing the training of the next learner and so on. The three primary boosting methods discussed here are Adaptive Boosting (aka AdaBoost), Gradient Boosting, 
       and Extreme Gradient Boosting (aka XGBoost).</p>
     <p>AdaBoost is often considered the simplest of the boosting methods. The primary difference between it and other boosting methods is that each iteration of the algorithm produces weights associated with the data 
       points in the training set; properly classified points have their weights decreased, while improperly classified points have increased weights. This cause the misclassified data to have a disproportionate impact 
@@ -1460,11 +1733,11 @@ So the information gained by this split would be 0.125 bits, which may or may no
     <figure>
     <img src="boosting_general.png" 
          alt="Generalized Boosting Strategy" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
       <figcaption>
     Source: <a href="https://www.analyticsvidhya.com/blog/2023/01/ensemble-learning-methods-bagging-boosting-and-stacking/" target="_blank">Analytics Vidhya</a>
   </figcaption>
-      <p style="font-size: 0.9em; color: #555;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This flowchart illustrates the general strategy employed by boosting ensemble models.
       </p> 
     </figure>
@@ -1472,11 +1745,11 @@ So the information gained by this split would be 0.125 bits, which may or may no
      <figure>
     <img src="gradient_flow.png" 
          alt="Gradient Flow vs Gradient Descent" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
       <figcaption>
     Source: <a href="https://www.offconvex.org/2022/01/06/gf-gd" target="_blank">Off The Complex Path</a>
   </figcaption>
-      <p style="font-size: 0.9em; color: #555;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         This is a three-dimensional representation of the process undertaken by gradient descent methods.
       </p> 
     </figure>
@@ -1490,8 +1763,8 @@ So the information gained by this split would be 0.125 bits, which may or may no
     <figure>
     <img src="df_boost_head.png" 
          alt="Cleaned Data Set" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      <p style="font-size: 0.9em; color: #555;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         The head of my cleaned data prior to splitting.
       </p> 
     </figure>
@@ -1499,9 +1772,9 @@ So the information gained by this split would be 0.125 bits, which may or may no
     <figure>
     <img src="X_train_X_test_heads.png" 
          alt="Training and Testing Sets" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
       
-      <p style="font-size: 0.9em; color: #555;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         The heads of my split training and testing sets.
       </p> 
     </figure>
@@ -1513,20 +1786,21 @@ So the information gained by this split would be 0.125 bits, which may or may no
     <h3>Results</h3>
     <p>My boosting model was an XGBoost regressor. For hyperparameter tuning, I implemented a GridSearchCV, which tested for optimal hyperparameter values for max tree depth, number of weak learners, learning rate, and 
       L2 regularization parameter. For max depth, I tested 1, 3, 5, and 7 depth trees. For number of estimators, I tested 50, 100, and 200. For learning rate, I tested 0.01, 0.1, and 0.3. Finally, for L2 regularization 
-      I tested 10-7, 10-5, 10-3, and 1.</p>
-    <p>My overall best performing model used a max depth of 1, 100 estimators, a learning rate of 0.1, and an L2 regularization of 1. This model produced an R2 value of 0.8344 during cross-validation and 0.8156 on the 
-      test set, with a root mean squared error of 6.2017. Of the top 5 models, all used an L2 regularization of 1, 4/5 used a max tree depth of 1 (the 5th used a max depth of 3), 3/5 used a learning rate of 0.1 (the 
-      other two used 0.3), and the number of estimators used included two model which used 100, two models which used 50, and one model (the best performer) which used 100. Interestingly, the difference in R2 value 
-      between the top performing model and the 5th highest performing model was on 0.0004.</p>
-    <p>Of the features included, CO2 concentration was far and away the most impactful; this is consistent with previously obtained results from other models. NO2 concentration cam in a distant second, with number of 
+      I tested 10&#8315;&#8311;, 10&#8315;&#8309;, 10&#8315;&#179;, and 1.</p>
+    <p>My overall best performing model used a max depth of 1, 100 estimators, a learning rate of 0.1, and an L2 regularization of 1. This model produced an R&sup2; value of 0.8344 during cross-validation and 0.8156 on the 
+      test set, with a root mean squared error of 6.2017. Of the top 5 models, all used an L2 regularization of 1, 4/5 used a max tree depth of 1 (the exception
+      used a max depth of 3), and 3/5 used a learning rate of 0.1 (the other two used 0.3). Estimator counts were more varied: two models used 100
+      estimators (including the best performer), two used 50, and one used 200. Interestingly, the difference in cross-validated R&sup2; between the top
+      performing model and the 5th highest performing model was only 0.0014.</p>
+    <p>Of the features included, CO2 concentration was far and away the most impactful; this is consistent with previously obtained results from other models. NO2 concentration came in a distant second, with number of 
       bacteria in the sample third after that.</p>
     <figure>
     <img src="xgboost_feature_importance_predictions.png" 
          alt="Feature Importance and Predictions vs Actual" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
       
-      <p style="font-size: 0.9em; color: #555;">
-        The left chart shows relative feature importance for the model; the left chart plots predicted target values vs actual.
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        The left chart shows relative feature importance for the model; the right chart plots predicted target values vs actual.
       </p> 
     </figure>
 
@@ -1537,14 +1811,14 @@ So the information gained by this split would be 0.125 bits, which may or may no
       particular, combines the strong regression predictions provided by Gradient Boost, while ameliorating some of the dangers of overfitting that algorithm has through the use of tuned regularization parameters.</p>
 
     <p>To better understand the impact of the boosting method on prediction accuracy, I implemented a linear regression model on the same training/testing set, and compared the results. In every metric, the XGBoost 
-      regressor outperformed the linear model, with significantly higher R2 and significantly lower RMSE.</p>
+      regressor outperformed the linear model, with significantly higher R&sup2; and significantly lower RMSE.</p>
 
     <figure>
     <img src="xgboost_vs_linear_regression_comparison.png" 
-         alt="XGBoost vs Linear Regressor Performance Comparissons" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
+         alt="XGBoost vs Linear Regressor Performance Comparisons" 
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
       
-      <p style="font-size: 0.9em; color: #555;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
         Direct comparisons of the performance of the XGBoost model vs a linear regression model.
       </p> 
     </figure>
@@ -1557,56 +1831,94 @@ So the information gained by this split would be 0.125 bits, which may or may no
 
   <section id="results">
     <h2>Project Results</h2>
-    <p>The following tables summarizes the topline metrics associated with my final models of each top.</p>
+    <p>
+      Across every model, one signal dominated: atmospheric CO2 concentration was consistently the strongest predictor
+      of ocean alkalinity, well ahead of any other feature tested. That held regardless of whether the task was
+      clustering, dimensionality reduction, classification, or regression — a level of consistency that wasn't
+      guaranteed given how different these approaches are.
+    </p>
+    <p>
+      The classification models performed remarkably well at distinguishing "high" vs. "low" alkalinity: Naive Bayes
+      reached 97.37% accuracy (F1 = 0.97) on the held-out test set, and the tuned Decision Tree matched it at 97%
+      accuracy, with both making only two misclassifications out of 76 test observations. The regression model,
+      XGBoost, explained roughly 82% of the variance in alkalinity on the test set (R&sup2; = 0.8156, RMSE = 6.20) and
+      clearly outperformed a linear regression baseline — evidence that the CO2&ndash;alkalinity relationship in this
+      dataset isn't purely linear.
+    </p>
+    <p>
+      The unsupervised methods surfaced something the supervised models couldn't: clustering (k=2, confirmed by
+      silhouette score) and PCA both independently split the data along the same line — observations from before 2016
+      land in one cluster, and everything after lands in the other. That pattern isn't something I set out to find, and
+      its cause remains unresolved (see Conclusions), but it shows up cleanly enough across two unrelated methods that
+      it's probably not noise.
+    </p>
     <figure>
-    <img src="comprehensive_model_comparison.png" 
-         alt="Primary Model Success Metrics" 
-         style="max-width: 100%; height: auto; border: 1px solid #ccc; padding: 10px;">
-      
-      <p style="font-size: 0.9em; color: #555;">
-        Final model metrcis.
-      </p> 
+    <img src="comprehensive_model_comparison.png"
+         alt="Primary Model Success Metrics"
+         style="max-width: 100%; height: auto; border: 1px solid var(--hairline); padding: 10px; border-radius: 3px;">
+      <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft);">
+        Final model metrics, compared across all four modeling approaches.
+      </p>
     </figure>
-    <p>Overall, all models performed well at their assigned tasks, whether classification or regression. Naive Bayes and
-    the tuned Decision Tree performed identically on the test set.</p>
+    <p>
+      Taken together: yes, atmospheric CO2 is a strong, consistent predictor of ocean alkalinity at this location,
+      under either framing (classification or regression) and corroborated by two independent clustering approaches.
+      But binning alkalinity into "high"/"low" throws away most of what's useful for real-world decisions, which is
+      why the XGBoost regression is the most practically useful of the four models.
+    </p>
   </section>
 
   <section id="challenges">
     <h2>Project Challenges</h2>
-    <p>First and foremost, the most difficult aspect of this project was acquiring the necessary data fora analysis. While 
-    some sources, such as the National Oceanic and Atmospheric Administration collects large swathes of data associated with
-    climate change and it's impacts, few if any of them were localized enough or contained the specific features needed to 
-    address the questions I wanted to address. Even after finding the BATS dataset, it proved incredibly difficult to find 
-    data which addressed some of my specific questions (especially those related to connecting CO2 levels and alkalinity to 
-    carbonate-shell forming marine life).</p>
-    
-    <p>Additional challenges, once the data had been acquired, were related to wrangling it into an appropriate form. All of my 
-    primary features were continuous, as was my target variable. As such, the data needed significant massaging to be usable 
-    for most of my models, especially the classification models. I was fortunate that my target variable was very cleanly 
-    bimodal, and could therefore be easily broken into "high" and "low" binary categories, but since this binning was based on 
-    cutoff point specific to this dataset, it dramatically lowers the broader applicability of these models to other locations.</p>
+    <p>First and foremost, the most difficult aspect of this project was acquiring the necessary data for analysis. While
+    sources like the National Oceanic and Atmospheric Administration collect large swathes of data associated with
+    climate change and its impacts, few if any of them were localized enough or contained the specific features needed to
+    address the questions I wanted to address. Even after finding the BATS dataset, it proved incredibly difficult to find
+    data which addressed some of my specific questions (especially those related to connecting CO2 levels and alkalinity to
+    carbonate-shell forming marine life) — several of the research questions I started with had to be dropped entirely for
+    lack of matching data (see Introduction).</p>
 
-    <p>Finally, broader interpretability of the results of these models has proven challenging. The nature of the data 
-    acquired for this project has necessarily limited our ability to interpret the results of these models in a broader, 
-    more global context. Combined with the lack of many of the most important features necessary to answer most of the 
-    initially proposed research questions, the nature of this project was forced to be reconfigured.</p>
+    <p>Additional challenges, once the data had been acquired, were related to wrangling it into an appropriate form. All of my
+    primary features were continuous, as was my target variable. As such, the data needed significant massaging to be usable
+    for most of my models, especially the classification models. I was fortunate that my target variable was very cleanly
+    bimodal, and could therefore be easily broken into "high" and "low" binary categories, but since this binning was based on
+    a cutoff point specific to this dataset, it dramatically lowers the broader applicability of these models to other locations.</p>
+
+    <p>Finally, broader interpretability of the results of these models has proven challenging. The nature of the data
+    acquired for this project has necessarily limited my ability to interpret the results in a broader, global context.
+    Combined with the lack of many of the most important features necessary to answer most of the initially proposed
+    research questions, these constraints ultimately narrowed the project's scope.</p>
+
+    <p>Given more time and access, the data I'd most want next is biological rather than chemical: mollusk or coral
+    population densities at this same location, over the same time frame, would make it possible to test whether
+    alkalinity is actually a sufficient proxy for ecosystem health, rather than relying on ocean chemistry alone.</p>
   </section>
 
   <section id="conclusions">
     <h2>Conclusions</h2>
-    <p>Ultimately, I believe the best conclusions can be derived from the results of my XGBoost model. As a regression model,
-     it was able to predict a continuous outcome, which removed the barrier to interpretability created by binning my target 
-    variable. Additionally, any research questions associated with ocean acidification and it's impacts will be primarily 
-    concerned with continuous valued variables, and so the ultimate utility of classification models would be limited. The 
-    final accuracy of the model (as measured by R^2) was sufficiently high (and outperformed a multiple linear regression 
-    model) to warrant further exploration for potential optimization, either through further hyperparameter tuning or the 
-    inclusion of new features.</p>
+    <p>The most interesting result to come out of this project wasn't something I went looking for: both K-Means and
+    Hierarchical clustering, independently corroborated by PCA, split the dataset cleanly into two groups along a single
+    dividing line — observations from before 2016, and everything after. I don't have a confirmed explanation for what
+    happened in 2016; the strongest lead is a spike in atmospheric CO2 that year coinciding with a strong El Niño event,
+    which external literature links to significant, lasting climate effects, but that connection remains a hypothesis
+    rather than something this dataset could directly confirm. Two unrelated unsupervised methods agreeing on the same
+    partition, unprompted, is a stronger signal than either one alone, and it's the kind of dataset-specific finding
+    that a purely predictive model would never have surfaced.</p>
 
-    <p>In the end, the only strong conclusion that can be drawn from this study is one that is already well understood by 
-    the world at large: increasing the concentration of dissolve carbon dioxide in ocean water reduces the buffering 
-    capacity of the ocean, which in turn can have numerous detrimental impacts on oceanic biomes. Though this result is one 
-    that is already so well-known, replication of results is the heart and soul of the scientific method. As such, this study 
-    stands as solid confirmation of this principle.</p>
+    <p>On the predictive side, I believe the most useful conclusions come from the XGBoost regression specifically.
+    The classification models (Naive Bayes and the tuned Decision Tree) both predicted high vs. low alkalinity at
+    around 97% accuracy, which is a strong result, but binning alkalinity into categories throws away information that
+    matters for real-world use. As a regression model, XGBoost predicts a continuous outcome instead, which removes
+    that barrier to interpretability — and any real research question about ocean acidification and its impacts will
+    ultimately be concerned with continuous-valued outcomes. The model's accuracy (R&sup2; = 0.8156 on the test set,
+    outperforming a linear regression baseline) is high enough to justify further work — more hyperparameter tuning,
+    or the inclusion of new features — before relying on it for anything beyond exploratory analysis.</p>
+
+    <p>Beyond that, the more general conclusion here is one that's already well understood: increasing dissolved
+    carbon dioxide in ocean water reduces its buffering capacity, with cascading effects on marine ecosystems. That
+    result isn't new, but replication is still central to the scientific method, and this project stands as an
+    independent, localized confirmation of it — built on data from a single, specific place rather than a broad,
+    aggregated dataset.</p>
   </section>
 
   <!-- Tab Switching Script -->

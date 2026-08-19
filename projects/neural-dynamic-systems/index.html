@@ -98,18 +98,23 @@
       z-index: 10;
       background: var(--paper);
       border-bottom: 1px solid var(--hairline);
-      overflow-x: auto;
-      white-space: nowrap;
     }
-    .tabs .wrap { padding-top: 2px; padding-bottom: 2px; }
+    .tabs .wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding-top: 2px;
+      padding-bottom: 2px;
+    }
     .tabs a {
       display: inline-block;
       font-family: var(--font-mono);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: var(--ink-soft);
       text-decoration: none;
-      padding: 14px 14px;
+      padding: 10px 10px;
       border-bottom: 2px solid transparent;
+      white-space: nowrap;
     }
     .tabs a:hover { color: var(--accent-ink); }
     .tabs a.active { color: var(--accent-ink); border-color: var(--accent); }
