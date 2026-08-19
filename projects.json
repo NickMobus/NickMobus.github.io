@@ -7,5 +7,14 @@
     "date": "2025",
     "link": "projects/ocean-acidification/index.html",
     "external": false
+  },
+  {
+    "title": "Applications of Neural Networks in Continuous and Dynamic Systems",
+    "description": "With Sean Fitzgerald — comparing an autoregressive MLP, RNN, LSTM, Transformer, Neural ODE, and Neural Jump ODE on their ability to recover the latent dynamics of non-stationary, regime-switching stochastic processes.",
+    "tags": ["Neural Networks", "Transformers", "Neural ODEs", "Time Series"],
+    "status": "Complete",
+    "date": "2026",
+    "link": "projects/neural-dynamic-systems/index.html",
+    "external": false
   }
 ]

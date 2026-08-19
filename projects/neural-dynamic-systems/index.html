@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applications of Neural Networks in Continuous and Dynamic Systems</title>
+  <meta name="description" content="Comparing MLP, RNN, LSTM, Transformer, Neural ODE, and Neural Jump ODE architectures on their ability to recover the latent dynamics of non-stationary, regime-switching stochastic processes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #faf9f6;
+      --paper-raised: #ffffff;
+      --ink: #1b1f23;
+      --ink-soft: #5b6470;
+      --hairline: #dedbd2;
+      --accent: #2b6e63;
+      --accent-tint: #e4efec;
+      --accent-ink: #163f38;
+      --font-display: "Source Serif 4", Georgia, serif;
+      --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      --radius: 3px;
+      --wrap: 880px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+    a { color: var(--accent-ink); }
+
+    .back-link {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 14px 0;
+    }
+    .back-link:hover { color: var(--accent-ink); }
+
+    header.report-header {
+      border-bottom: 1px solid var(--hairline);
+      padding: 12px 0 40px;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin: 0 0 14px;
+      letter-spacing: 0.02em;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(1.7rem, 3.6vw, 2.3rem);
+      line-height: 1.25;
+      margin: 0 0 14px;
+      max-width: 30ch;
+    }
+    .byline {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      margin: 0 0 20px;
+    }
+    .byline strong { color: var(--ink); font-weight: 500; }
+
+    .resource-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .resource-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--accent-ink);
+      background: var(--accent-tint);
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      text-decoration: none;
+    }
+    .resource-links a:hover { text-decoration: underline; }
+
+    /* Tab nav */
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--paper);
+      border-bottom: 1px solid var(--hairline);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .tabs .wrap { padding-top: 2px; padding-bottom: 2px; }
+    .tabs a {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 14px 14px;
+      border-bottom: 2px solid transparent;
+    }
+    .tabs a:hover { color: var(--accent-ink); }
+    .tabs a.active { color: var(--accent-ink); border-color: var(--accent); }
+
+    section { display: none; padding: 40px 0 56px; }
+    section.active { display: block; }
+
+    section h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin: 0 0 20px;
+      border-bottom: 1px solid var(--hairline);
+      padding-bottom: 10px;
+    }
+    section h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      margin: 32px 0 12px;
+    }
+    section p { color: var(--ink-soft); max-width: 72ch; }
+    section ul { color: var(--ink-soft); max-width: 72ch; }
+
+    figure { margin: 24px 0; }
+    figure img {
+      max-width: 100%;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      background: var(--paper-raised);
+    }
+    figcaption {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-top: 8px;
+    }
+
+    .fig-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    table.results {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 20px 0;
+    }
+    table.results caption {
+      caption-side: top;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-bottom: 10px;
+    }
+    table.results th, table.results td {
+      border: 1px solid var(--hairline);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    table.results thead th {
+      background: var(--accent-tint);
+      color: var(--accent-ink);
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: 0.78rem;
+    }
+    table.results tbody th { font-weight: 500; }
+    table.results tr.best td, table.results tr.best th { background: var(--accent-tint); }
+    td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 4px; }
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent-ink);
+      background: var(--accent-tint);
+      padding: 3px 8px;
+      border-radius: var(--radius);
+    }
+
+    .notebook-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .notebook-list a {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      border: 1px solid var(--hairline);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--paper-raised);
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .notebook-list a:hover { border-color: var(--accent); }
+    .notebook-list span { color: var(--ink-soft); font-family: var(--font-body); font-size: 0.82rem; }
+
+    footer.report-footer {
+      border-top: 1px solid var(--hairline);
+      padding: 22px 0;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <a class="back-link" href="../../index.html">&larr; Back to all projects</a>
+  </div>
+
+  <header class="report-header">
+    <div class="wrap">
+      <p class="eyebrow">// neural networks final project</p>
+      <h1>Applications of Neural Networks in Continuous and Dynamic Systems</h1>
+      <p class="byline">
+        <strong>Nick Mobus</strong> &amp; <strong>Sean Fitzgerald</strong> &middot;
+        CSCI 5922, Fundamentals of Neural Networks and Deep Learning
+      </p>
+      <div class="resource-links">
+        <a href="NN_Final_Project_Report_Nick_Mobus_and_Sean_Fitzgerald.pdf" target="_blank">Full report (PDF)</a>
+        <a href="NN_Final_Project_Poster.pdf" target="_blank">Poster (PDF)</a>
+        <a href="https://youtu.be/qlE2N5_VcXM" target="_blank" rel="noopener">Presentation video</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <div class="wrap">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#data">Data &amp; Methods</a>
+      <a href="#models">Models</a>
+      <a href="#results">Results</a>
+      <a href="#conclusions">Conclusions</a>
+      <a href="#code">Code</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+
+    <section id="overview" class="active">
+      <h2>Overview</h2>
+      <p>
+        Most neural networks are trained once and then frozen — their learned parameters stop
+        changing the moment training ends. That's a problem for the many real systems whose
+        behavior isn't fixed: financial markets, physiological signals, user behavior, and other
+        processes whose statistics drift, shift regimes, or change discontinuously over time.
+      </p>
+      <p>
+        This project asks a narrower version of that question: given a stochastic process whose
+        underlying probability parameter changes over time, can a neural network recover the
+        <em>true, hidden</em> probability driving it — not just predict the next observed
+        outcome, but reconstruct the latent dynamics themselves? We built two synthetic
+        regime-switching Bernoulli (coin-flip) datasets and trained six architectures — an
+        autoregressive MLP, an RNN, an LSTM, a Transformer, a Neural ODE, and a Neural Jump ODE —
+        to estimate that hidden probability at every timestep, then compared how well each one
+        actually recovered it.
+      </p>
+      <p>
+        The short version: architectures built to represent temporal structure explicitly — recurrence,
+        continuous latent evolution, and especially explicit handling of discontinuous regime
+        changes — did substantially better than a plain feedforward autoregressive model. The
+        <strong>Neural Jump ODE</strong> came out on top across every metric we measured.
+      </p>
+      <div class="tag-row">
+        <span class="tag">Neural Networks</span>
+        <span class="tag">Transformers</span>
+        <span class="tag">Neural ODEs</span>
+        <span class="tag">Time Series</span>
+        <span class="tag">Non-Stationary Processes</span>
+      </div>
+    </section>
+
+    <section id="data">
+      <h2>Data &amp; Methods</h2>
+      <p>
+        Rather than using a real-world dataset, we generated synthetic data so that the true
+        latent probability at every timestep would be known exactly — which makes it possible to
+        score each model on how well it recovers the underlying dynamics, not just how well it
+        predicts the next coin flip.
+      </p>
+      <p>
+        Both datasets are sequences of binary outcomes drawn from a Bernoulli process whose success
+        probability <em>p</em> changes over time via regime switching:
+      </p>
+      <ul>
+        <li><strong>Deterministic ("clean") dataset</strong> — <em>p</em> switches between regimes on a fixed
+          schedule, producing sharp, predictable transitions.</li>
+        <li><strong>Probabilistic ("noisy") dataset</strong> — regime switches themselves happen
+          stochastically, and additive Gaussian noise is layered on top, producing smoother, more
+          gradual drift in <em>p</em>.</li>
+      </ul>
+      <p>
+        Each model's final sigmoid output at each timestep is treated as its estimate of the
+        latent <em>p</em>, and evaluated against the true generating value.
+      </p>
+      <figure>
+        <img src="latent_p_det_vs_prob.png" alt="Comparison of the deterministic and probabilistic latent probability series used to generate the two toy datasets" />
+        <figcaption>The two synthetic latent-probability series: deterministic regime switching vs. probabilistic switching with noise.</figcaption>
+      </figure>
+      <h3>Evaluation metrics</h3>
+      <ul>
+        <li><strong>MAE</strong> — average magnitude of prediction error.</li>
+        <li><strong>RMSE</strong> — emphasizes larger errors, useful for spotting models that miss
+          regime changes badly.</li>
+        <li><strong>Correlation</strong> — how well a model tracks the true probability's temporal
+          structure, independent of scale.</li>
+      </ul>
+    </section>
+
+    <section id="models">
+      <h2>Models</h2>
+      <p>Six architectures were trained and evaluated on identical train/test splits (n=5000 each), on both the clean and noisy datasets:</p>
+      <div class="fig-grid">
+        <figure>
+          <img src="true_vs_pred_p_over_samples_autoregressive_mlp.png" alt="True vs. predicted probability for the autoregressive MLP" />
+          <figcaption>Autoregressive MLP — a feedforward baseline with a fixed lookback window.</figcaption>
+        </figure>
+        <figure>
+          <img src="true_vs_pred_p_over_samples_rnn_test_noisy.png" alt="True vs. predicted probability for the RNN on the noisy test set" />
+          <figcaption>RNN — recurrent baseline, noisy test set.</figcaption>
+        </figure>
+        <figure>
+          <img src="true_vs_pred_p_lstm_test_noisy.png" alt="True vs. predicted probability for the LSTM on the noisy test set" />
+          <figcaption>LSTM — gated recurrence, noisy test set.</figcaption>
+        </figure>
+        <figure>
+          <img src="true_vs_pred_p_transformer_test_noisy.png" alt="True vs. predicted probability for the Transformer on the noisy test set" />
+          <figcaption>Transformer — self-attention over the input window, noisy test set.</figcaption>
+        </figure>
+        <figure>
+          <img src="true_vs_pred_p_neural_ode_test_noisy.png" alt="True vs. predicted probability for the Neural ODE on the noisy test set" />
+          <figcaption>Neural ODE — continuous-time latent state evolution, noisy test set.</figcaption>
+        </figure>
+        <figure>
+          <img src="true_vs_pred_p_neural_jump_ode_test_noisy.png" alt="True vs. predicted probability for the Neural Jump ODE on the noisy test set" />
+          <figcaption>Neural Jump ODE — continuous evolution plus explicit jumps at regime changes, noisy test set.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="results">
+      <h2>Results</h2>
+      <p>
+        The Neural Jump ODE achieved the best score on every metric, on both datasets, with the
+        LSTM a close second. The Transformer underperformed the recurrent and continuous-time
+        models without extensive tuning. Interestingly, every model scored better on the
+        <em>noisy</em> dataset than the clean one — the noisy dataset's smoother, probabilistic
+        transitions turned out to be easier to track than the clean dataset's sharp, deterministic
+        regime switches.
+      </p>
+      <table class="results">
+        <caption>Table 1 &mdash; Model performance on clean and noisy datasets (lower MAE/RMSE and higher correlation are better)</caption>
+        <thead>
+          <tr>
+            <th rowspan="2">Model</th>
+            <th colspan="3">Clean data</th>
+            <th colspan="3">Noisy data</th>
+          </tr>
+          <tr>
+            <th class="num">MAE</th><th class="num">RMSE</th><th class="num">Corr</th>
+            <th class="num">MAE</th><th class="num">RMSE</th><th class="num">Corr</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>MLP</th>
+            <td class="num">0.0518</td><td class="num">0.0658</td><td class="num">0.8493</td>
+            <td class="num">0.0404</td><td class="num">0.0506</td><td class="num">0.8911</td>
+          </tr>
+          <tr>
+            <th>RNN</th>
+            <td class="num">0.0362</td><td class="num">0.0472</td><td class="num">0.9266</td>
+            <td class="num">0.0300</td><td class="num">0.0374</td><td class="num">0.9467</td>
+          </tr>
+          <tr>
+            <th>LSTM</th>
+            <td class="num">0.0340</td><td class="num">0.0444</td><td class="num">0.9373</td>
+            <td class="num">0.0268</td><td class="num">0.0335</td><td class="num">0.9473</td>
+          </tr>
+          <tr>
+            <th>Transformer</th>
+            <td class="num">0.0685</td><td class="num">0.0864</td><td class="num">0.7207</td>
+            <td class="num">0.0524</td><td class="num">0.0648</td><td class="num">0.7725</td>
+          </tr>
+          <tr>
+            <th>Neural ODE</th>
+            <td class="num">0.0464</td><td class="num">0.0601</td><td class="num">0.8827</td>
+            <td class="num">0.0321</td><td class="num">0.0401</td><td class="num">0.9291</td>
+          </tr>
+          <tr class="best">
+            <th>Neural Jump ODE</th>
+            <td class="num">0.0336</td><td class="num">0.0435</td><td class="num">0.9374</td>
+            <td class="num">0.0256</td><td class="num">0.0324</td><td class="num">0.9521</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="fig-grid">
+        <figure>
+          <img src="true_vs_pred_p_neural_jump_ode_test.png" alt="Neural Jump ODE true vs. predicted probability on the clean test set" />
+          <figcaption>Neural Jump ODE, clean test set — the strongest overall model.</figcaption>
+        </figure>
+        <figure>
+          <img src="true_vs_pred_p_neural_jump_ode_test_noisy.png" alt="Neural Jump ODE true vs. predicted probability on the noisy test set" />
+          <figcaption>Neural Jump ODE, noisy test set.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="conclusions">
+      <h2>Conclusions</h2>
+      <p>
+        Architectural inductive bias matters for non-stationary processes. Models that explicitly
+        represent temporal memory, continuous latent evolution, or discontinuous regime changes —
+        recurrence, Neural ODEs, and especially the jump mechanism in the Neural Jump ODE — tracked
+        the true dynamics far better than a plain feedforward autoregressive model with a fixed
+        receptive field. The Transformer's relatively weak showing suggests attention alone, without
+        substantial tuning, isn't a natural fit for this kind of task.
+      </p>
+      <p>
+        The main limitation is scope: this used controlled synthetic Bernoulli processes, not
+        real-world data, so it's an open question how well these findings transfer to
+        higher-dimensional, longer-horizon, or partially observed systems. The full report covers
+        this in more depth, along with an ablation-focused direction for future work and a
+        discussion of the ethical considerations that come with applying these architectures
+        (finance, healthcare, behavioral prediction) to systems where mis-modeled non-stationarity
+        has real consequences.
+      </p>
+    </section>
+
+    <section id="code">
+      <h2>Code</h2>
+      <p>Each model was trained and evaluated in its own notebook, all built on a shared toy-data generation package.</p>
+      <ul class="notebook-list">
+        <li><a href="toy_dataset_generator.ipynb">toy_dataset_generator.ipynb</a><br><span>Generates the deterministic and probabilistic regime-switching datasets.</span></li>
+        <li><a href="Autoregressive_MLP_on_toy_data.ipynb">Autoregressive_MLP_on_toy_data.ipynb</a></li>
+        <li><a href="RNN_on_toy_data.ipynb">RNN_on_toy_data.ipynb</a></li>
+        <li><a href="LSTM_on_toy_data.ipynb">LSTM_on_toy_data.ipynb</a></li>
+        <li><a href="Transformer_on_toy_data.ipynb">Transformer_on_toy_data.ipynb</a></li>
+        <li><a href="Neural_ODE_on_toy_data.ipynb">Neural_ODE_on_toy_data.ipynb</a></li>
+        <li><a href="Neural_Jump_ODE_on_toy_data.ipynb">Neural_Jump_ODE_on_toy_data.ipynb</a></li>
+        <li><a href="methods_graph.ipynb">methods_graph.ipynb</a><br><span>Builds the architecture/methods diagram used in the report.</span></li>
+      </ul>
+      <p style="margin-top: 20px;">
+        The <code>toy_data/</code> folder contains the shared data-generation package
+        (<code>generation.py</code>, <code>adapters.py</code>, <code>plotting.py</code>) and the
+        pre-generated train/test JSON files each notebook loads.
+      </p>
+    </section>
+
+  </div>
+
+  <footer class="report-footer">
+    <div class="wrap">
+      <span>CSCI 5922 final project &middot; Nick Mobus &amp; Sean Fitzgerald</span>
+    </div>
+  </footer>
+
+  <script>
+    const tabs = document.querySelectorAll('.tabs a');
+    const allSections = document.querySelectorAll('section[id]');
+
+    function activate(id) {
+      tabs.forEach(t => t.classList.toggle('active', t.getAttribute('href') === '#' + id));
+      allSections.forEach(s => s.classList.toggle('active', s.id === id));
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = tab.getAttribute('href').slice(1);
+        activate(id);
+        history.replaceState(null, '', '#' + id);
+        window.scrollTo({ top: 0 });
+      });
+    });
+
+    const initial = window.location.hash ? window.location.hash.slice(1) : 'overview';
+    activate(document.getElementById(initial) ? initial : 'overview');
+  </script>
+
+</body>
+</html>
