@@ -1,0 +1,5 @@
+# Original raw-materials folder for the PISA project — superseded by
+# projects/pisa-2022-insights/. Contains files too large for GitHub (the
+# 105MB student microdata CSV exceeds GitHub's 100MB file limit) and a
+# misplaced, unrelated zip. Not meant to be committed.
+projects/PISA-data-mining/

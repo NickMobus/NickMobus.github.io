@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Educational Insights with PISA 2022 Datasets</title>
+  <meta name="description" content="Data mining project analyzing OECD PISA 2022 results (613,744 students, 81 countries): linear regression, Naive Bayes, SVM, Random Forest, and KNN models exploring what predicts national math proficiency." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #faf9f6;
+      --paper-raised: #ffffff;
+      --ink: #1b1f23;
+      --ink-soft: #5b6470;
+      --hairline: #dedbd2;
+      --accent: #2b6e63;
+      --accent-tint: #e4efec;
+      --accent-ink: #163f38;
+      --font-display: "Source Serif 4", Georgia, serif;
+      --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      --radius: 3px;
+      --wrap: 880px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+    a { color: var(--accent-ink); }
+
+    .back-link {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 14px 0;
+    }
+    .back-link:hover { color: var(--accent-ink); }
+
+    header.report-header {
+      border-bottom: 1px solid var(--hairline);
+      padding: 12px 0 40px;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin: 0 0 14px;
+      letter-spacing: 0.02em;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(1.7rem, 3.6vw, 2.3rem);
+      line-height: 1.25;
+      margin: 0 0 14px;
+      max-width: 34ch;
+    }
+    .byline {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      margin: 0 0 20px;
+    }
+    .byline strong { color: var(--ink); font-weight: 500; }
+
+    .resource-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .resource-links a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--accent-ink);
+      background: var(--accent-tint);
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      text-decoration: none;
+    }
+    .resource-links a:hover { text-decoration: underline; }
+
+    /* Tab nav */
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--paper);
+      border-bottom: 1px solid var(--hairline);
+    }
+    .tabs .wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding-top: 2px;
+      padding-bottom: 2px;
+    }
+    .tabs a {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 10px 10px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+    .tabs a:hover { color: var(--accent-ink); }
+    .tabs a.active { color: var(--accent-ink); border-color: var(--accent); }
+
+    section { display: none; padding: 40px 0 56px; }
+    section.active { display: block; }
+
+    section h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin: 0 0 20px;
+      border-bottom: 1px solid var(--hairline);
+      padding-bottom: 10px;
+    }
+    section h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      margin: 32px 0 12px;
+    }
+    section p { color: var(--ink-soft); max-width: 72ch; }
+    section ul { color: var(--ink-soft); max-width: 72ch; }
+    section li { margin-bottom: 6px; }
+
+    figure { margin: 24px 0; }
+    figure img {
+      max-width: 100%;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      background: var(--paper-raised);
+      padding: 10px;
+    }
+    figcaption {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-top: 8px;
+    }
+
+    .fig-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    table.results {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin: 20px 0;
+    }
+    table.results caption {
+      caption-side: top;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-bottom: 10px;
+    }
+    table.results th, table.results td {
+      border: 1px solid var(--hairline);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    table.results thead th {
+      background: var(--accent-tint);
+      color: var(--accent-ink);
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: 0.76rem;
+    }
+    td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 4px; }
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent-ink);
+      background: var(--accent-tint);
+      padding: 3px 8px;
+      border-radius: var(--radius);
+    }
+
+    .notebook-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .notebook-list a {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      border: 1px solid var(--hairline);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--paper-raised);
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .notebook-list a:hover { border-color: var(--accent); }
+    .notebook-list span { color: var(--ink-soft); font-family: var(--font-body); font-size: 0.82rem; }
+
+    .callout {
+      border: 1px solid var(--hairline);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--paper-raised);
+      padding: 14px 18px;
+      margin: 20px 0;
+      max-width: 72ch;
+    }
+    .callout p { margin: 0; }
+
+    footer.report-footer {
+      border-top: 1px solid var(--hairline);
+      padding: 22px 0;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <a class="back-link" href="../../index.html">&larr; Back to all projects</a>
+  </div>
+
+  <header class="report-header">
+    <div class="wrap">
+      <p class="eyebrow">// data mining final project</p>
+      <h1>Educational Insights with PISA 2022 Datasets</h1>
+      <p class="byline">
+        <strong>Nick Mobus</strong>, <strong>Vanessa Thorsten</strong> &amp; <strong>Sean Fitzgerald</strong> &middot;
+        CSCI 5502, Data Mining &middot; University of Colorado Boulder, April 2025
+      </p>
+      <div class="resource-links">
+        <a href="PISA_2022_Final_Report.pdf" target="_blank">Full report (PDF)</a>
+        <a href="PISA_2022_Poster.pdf" target="_blank">Poster (PDF)</a>
+        <a href="https://seanfitzgerald11.wixsite.com/oecd-pisa-insights" target="_blank" rel="noopener">Original team site</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <div class="wrap">
+      <a href="#overview" class="active">Overview</a>
+      <a href="#data">Data</a>
+      <a href="#aim1">Aim 1: Literacy &amp; Math</a>
+      <a href="#aim2">Aim 2: Minimum Proficiency</a>
+      <a href="#aim3">Aim 3: Food Security</a>
+      <a href="#conclusions">Conclusions</a>
+      <a href="#code">Code</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+
+    <section id="overview" class="active">
+      <h2>Overview</h2>
+      <p>
+        Education is one of the most consistent predictors of an individual's later-life outcomes &mdash; and, in
+        aggregate, of a country's ability to compete in a global economy. The OECD's Programme for International
+        Student Assessment (PISA) tests the math, reading, and science skills of 15-year-olds every three years; the
+        2022 round, with a specific focus on mathematics, covered 613,744 students across 81 countries.
+      </p>
+      <p>
+        This project rolled that student-level data up to the country level and joined it with World Bank GDP and
+        education-spending data to investigate three aims:
+      </p>
+      <ul>
+        <li><strong>Aim 1</strong> &mdash; whether a country's average reading proficiency and a handful of
+          behavioral factors predict its average math performance (linear regression).</li>
+        <li><strong>Aim 2</strong> &mdash; the strongest predictors of whether a country meets the minimum math
+          proficiency standard (Gaussian Naive Bayes vs. Support Vector Machine).</li>
+        <li><strong>Aim 3</strong> &mdash; the relationship between a country's math proficiency tier and food
+          insecurity among its students (Random Forest vs. K-Nearest Neighbors).</li>
+      </ul>
+      <p>
+        The short version: reading proficiency is a very strong predictor of math performance; socioeconomic status
+        and food insecurity consistently out-predicted both geographic region and how much a country spends on
+        education (as a percent of GDP); and models across the board did well distinguishing the extremes but
+        struggled to separate the "meets minimum but nothing more" middle tier of countries from the rest.
+      </p>
+      <div class="tag-row">
+        <span class="tag">Data Mining</span>
+        <span class="tag">Linear Regression</span>
+        <span class="tag">Naive Bayes</span>
+        <span class="tag">SVM</span>
+        <span class="tag">Random Forest</span>
+        <span class="tag">KNN</span>
+        <span class="tag">Education</span>
+      </div>
+    </section>
+
+    <section id="data">
+      <h2>Data</h2>
+      <p>
+        Data came from four sources: PISA 2022 student testing and socioeconomic-status (SES) results (OECD, via a
+        signed data-use agreement), GDP per capita by country (World Bank, via Our World in Data), and government
+        education expenditure as a percent of GDP (UNESCO / World Bank).
+      </p>
+      <figure>
+        <img src="fig01_data_sources.png" alt="Diagram of data sources rolling up 613,744 student questionnaires into an 81-country analysis file with 119 variables, feeding into three research questions" />
+        <figcaption>Figure 1 &mdash; how four separate data sources were combined into one 81-country analysis file.</figcaption>
+      </figure>
+      <h3>Cleaning &amp; preparation</h3>
+      <p>
+        Missing values were imputed with the median where rare, and countries were excluded from a given analysis
+        where data was more broadly missing &mdash; for example, 15 countries didn't include the food-security
+        questions in their student questionnaire, so they were dropped from any analysis involving that variable.
+        Country names were standardized across sources, and dimensionality was reduced primarily by rolling up
+        student-level responses (n = 613,744) to country-level weighted averages (n = 81), using each student's
+        trimmed, non-response-adjusted survey weight.
+      </p>
+      <p>
+        A Shapiro-Wilk test on the normalized average math scores came back non-normal (p = 0.027) &mdash; visible in
+        the QQ-plot below &mdash; which was factored into model selection downstream.
+      </p>
+      <figure>
+        <img src="fig02_qq_plot.png" alt="QQ-plot of normalized average PISA math proficiency scores showing deviation from normality" />
+        <figcaption>Figure 2 &mdash; QQ-plot of normalized average math scores; the S-curve indicates the distribution isn't quite normal.</figcaption>
+      </figure>
+      <h3>What the data showed early on</h3>
+      <p>
+        Average math scores across countries ranged from 336 to 575 (mean 437.65, SD 58.19). Math, reading, and
+        science scores were all highly correlated with each other (r &gt; 0.9). GDP and SES were both strongly
+        correlated with achievement scores (r = 0.7), while a lack of grit and a lack of empathy were negatively
+        correlated with achievement, and never (or almost never) going hungry was moderately positively correlated
+        with achievement (r &asymp; 0.6).
+      </p>
+    </section>
+
+    <section id="aim1">
+      <h2>Aim 1: Literacy &amp; Math (Linear Regression)</h2>
+      <p>
+        The question: does a country's average reading proficiency &mdash; plus a set of behavioral variables &mdash;
+        predict its average math proficiency? Plotting reading against math by country showed a clear, strong,
+        positive linear relationship, which made linear regression a natural fit.
+      </p>
+      <figure>
+        <img src="fig03_literacy_vs_math.png" alt="Scatter plot showing a strong positive linear relationship between average reading proficiency and average math proficiency across countries" />
+        <figcaption>Figure 3 &mdash; average reading proficiency vs. average math proficiency, by country.</figcaption>
+      </figure>
+      <h3>From one predictor to a workable model</h3>
+      <p>
+        A model using reading performance alone already performed well (R&sup2; = 0.848).
+      </p>
+      <figure>
+        <img src="table1_simple_regression.png" alt="OLS regression summary table for math proficiency predicted by reading proficiency alone, R-squared 0.848" />
+        <figcaption>Table 1 &mdash; simple linear regression: math proficiency ~ reading proficiency.</figcaption>
+      </figure>
+      <p>
+        Adding every available behavioral variable (each broken into 5&ndash;8 sub-variable proportions) produced 17
+        independent variables &mdash; far too many for the sample size, leaving the model with only 1 residual degree
+        of freedom and making it badly overfit. That model had to be discarded.
+      </p>
+      <p>
+        Instead, each behavioral variable was collapsed into a single aggregate (e.g. "percent of students reporting
+        a high love of learning"), and a subset regression tested every combination of the resulting 7 variables
+        against RSS, adjusted R&sup2;, AIC, and BIC.
+      </p>
+      <figure>
+        <img src="fig04_model_selection.png" alt="Four panel plot showing RSS, adjusted R-squared, AIC, and BIC against number of predictors, all identifying 2 predictors as optimal" />
+        <figcaption>Figure 4 &mdash; model selection across predictor counts: all four metrics agree the 2-predictor model is best.</figcaption>
+      </figure>
+      <p>
+        The best model used reading proficiency plus the aggregate "high love of learning" variable
+        (R&sup2; = 0.899, adjusted R&sup2; = 0.894) &mdash; a meaningful, if modest, improvement over reading alone.
+      </p>
+      <figure>
+        <img src="table2_multiple_regression.png" alt="OLS regression summary table for math proficiency predicted by reading proficiency and percent high love of learning, adjusted R-squared 0.894" />
+        <figcaption>Table 2 &mdash; the selected 2-predictor model: math proficiency ~ reading proficiency + % high love of learning.</figcaption>
+      </figure>
+      <figure>
+        <img src="table3_model_comparison.png" alt="Table comparing the reading-only model and the 2-predictor model on adjusted R-squared, AIC, BIC, and RMSE" />
+        <figcaption>Table 3 &mdash; model comparison. The 2-predictor model wins on adjusted R&sup2; (0.894 vs. 0.848) and RMSE (18.95 vs. 20.75), despite a slightly worse AIC/BIC (expected, since AIC/BIC penalize the extra parameter).</figcaption>
+      </figure>
+      <figure>
+        <img src="fig05_actual_vs_fitted.png" alt="Scatter plot of actual versus fitted math proficiency values for the selected model, closely following the diagonal" />
+        <figcaption>Figure 5 &mdash; actual vs. fitted math proficiency for the selected model.</figcaption>
+      </figure>
+      <p>
+        61 of the original 81 countries had complete data for this analysis after countries with missing values were
+        dropped &mdash; a reasonable sample for a 2-parameter model, if not enough for the earlier 17-parameter one.
+      </p>
+    </section>
+
+    <section id="aim2">
+      <h2>Aim 2: Minimum Proficiency (Naive Bayes vs. SVM)</h2>
+      <p>
+        PISA's minimum math proficiency standard (Sustainable Development Goal 4.1.1) corresponds to a score of
+        420.07 or higher. This aim treated that as a binary outcome &mdash; meets vs. doesn't meet &mdash; and asked
+        which factors predict it: SES, percent of GDP spent on education, geographic region, and food insecurity.
+      </p>
+      <figure>
+        <img src="fig06_gdp_ses_proficiency.png" alt="Joint scatter and density plot of GDP versus SES colored by whether countries met minimum math proficiency, showing below-minimum countries clustered at lower GDP and SES" />
+        <figcaption>Figure 6 &mdash; GDP vs. SES by minimum-proficiency status. World Bank GDP and PISA-derived SES track closely, and with a few exceptions, countries below the minimum standard were also the poorest.</figcaption>
+      </figure>
+      <p>Continuous features were standardized before modeling:</p>
+      <div class="fig-grid">
+        <figure>
+          <img src="fig07_original_data_summary.png" alt="Summary statistics table of SES and education spending percent GDP before scaling" />
+          <figcaption>Figure 7 &mdash; SES and education-spending summary statistics before scaling.</figcaption>
+        </figure>
+        <figure>
+          <img src="fig08_transformed_data_summary.png" alt="Summary statistics table of SES and education spending percent GDP after StandardScaler transformation, mean approximately zero" />
+          <figcaption>Figure 8 &mdash; the same variables after StandardScaler transformation.</figcaption>
+        </figure>
+      </div>
+      <h3>Tuning</h3>
+      <p>
+        Both models were tuned with GridSearchCV. Gaussian Naive Bayes has one real hyperparameter,
+        <code>var_smoothing</code>; values from the default (1e-9) up through 1e-4 were tested, and the default
+        proved best. For SVM, three hyperparameters were tuned: <code>C</code> (0.1&ndash;100, best at 0.1, i.e. a
+        soft margin), <code>kernel</code> (linear, polynomial, and RBF tested; RBF won), and <code>gamma</code>
+        (best at "scale").
+      </p>
+      <figure>
+        <img src="table4_nb_svm_metrics.png" alt="Table of accuracy, precision, recall, and f1-score for Gaussian Naive Bayes and SVM predicting minimum math proficiency" />
+        <figcaption>Table 4 &mdash; evaluation metrics for both classifiers on the test set.</figcaption>
+      </figure>
+      <p>
+        Even after tuning, SVM badly overpredicted the "meets minimum" class &mdash; to the point that it never
+        classified a single test-set country as below minimum proficiency. Gaussian Naive Bayes handled both classes
+        reasonably well, with accuracy, precision, recall, and F1 all at or above 71%.
+      </p>
+      <figure>
+        <img src="fig09_roc_nb_svm.png" alt="ROC curve comparison of Gaussian Naive Bayes (AUC 0.96) and SVM (AUC 0.92)" />
+        <figcaption>Figure 9 &mdash; ROC comparison: Naive Bayes (AUC = 0.96) matched or outperformed SVM (AUC = 0.92) at every threshold.</figcaption>
+      </figure>
+      <figure>
+        <img src="fig10_feature_importance_nb.png" alt="Bar chart of Gaussian Naive Bayes feature importance by mean difference, led by SES, then food insecurity proportions, then Western Europe region, then education spending" />
+        <figcaption>Figure 10 &mdash; feature importance (mean difference) for the Naive Bayes model. Average SES ranked highest, closely followed by the food-insecurity proportions; education spending as a percent of GDP, while still significant, ranked well behind those.</figcaption>
+      </figure>
+    </section>
+
+    <section id="aim3">
+      <h2>Aim 3: Food Security (Random Forest vs. KNN)</h2>
+      <p>
+        This aim split countries into three tiers &mdash; below minimum proficiency (&lt;420.07), meets minimum
+        (420.07&ndash;482.38), and exceeds minimum (482.38+) &mdash; and asked how food insecurity, SES, and GDP
+        relate to that tier. The food-insecurity measure was the weighted proportion of students per country who
+        reported not eating, due to lack of money, two or more times in the last 30 days.
+      </p>
+      <figure>
+        <img src="fig11_hunger_boxplot.png" alt="Boxplot showing the percentage of students not eating two or more times a week decreasing across the three math proficiency tiers" />
+        <figcaption>Figure 11 &mdash; food insecurity by proficiency tier: countries below minimum proficiency had a visibly higher median rate of student food insecurity.</figcaption>
+      </figure>
+      <h3>Tuning</h3>
+      <p>
+        Random Forest was tuned over <code>n_estimators</code> (300, 400, 500) and <code>max_depth</code> (2, 3, 5,
+        8), with balanced class weights to offset the class imbalance; the best model used 300 estimators and a max
+        depth of 2. KNN was tuned over <code>n_neighbors</code> (2&ndash;5) and distance metric (Euclidean, Manhattan,
+        max, Minkowski); the best model used 2 neighbors and the Euclidean metric. Region was dropped as
+        uninformative for both models, and KNN in particular performed better once narrowed to just SES, GDP, and
+        food security.
+      </p>
+      <figure>
+        <img src="table5_rf_knn_metrics.png" alt="Table of precision, recall, and f1-score for Random Forest and KNN across the three proficiency tiers" />
+        <figcaption>Table 5 &mdash; evaluation metrics for both models across all three tiers.</figcaption>
+      </figure>
+      <p>
+        Random Forest outperformed KNN at both extremes &mdash; below minimum (precision 0.80, recall 0.89, F1 0.84
+        vs. KNN's 0.72 / 0.89 / 0.80) and above minimum (precision 0.65, recall 1.00, F1 0.77 vs. KNN's 0.50 / 0.60 /
+        0.54). Neither model, however, classified the middle "meets minimum" tier better than chance would.
+      </p>
+      <figure>
+        <img src="fig12_roc_rf_knn.png" alt="Micro-averaged one-vs-rest ROC curves for Random Forest (AUC 0.87) and KNN (AUC 0.79)" />
+        <figcaption>Figure 12 &mdash; micro-averaged ROC: Random Forest (AUC = 0.87) vs. KNN (AUC = 0.79).</figcaption>
+      </figure>
+      <figure>
+        <img src="fig13_feature_importance_rf.png" alt="Bar chart of Random Forest Gini feature importance led by country GDP, then SES, then food insecurity, then life satisfaction" />
+        <figcaption>Figure 13 &mdash; Random Forest feature importance. Country-level GDP and average SES ranked ahead of food insecurity, which itself outranked education spending as a percent of GDP.</figcaption>
+      </figure>
+    </section>
+
+    <section id="conclusions">
+      <h2>Conclusions</h2>
+      <p>
+        Reading and math proficiency are, unsurprisingly, tightly linked &mdash; but a country's subjective "love of
+        learning" adds real (if modest) predictive value on top of raw literacy. More strikingly, the same handful
+        of socioeconomic factors kept surfacing as the strongest predictors across every model type tried: average
+        SES, national GDP, and food insecurity consistently outranked both geographic region and the specific
+        behavioral variables (growth mindset, grit, empathy) included in the models.
+      </p>
+      <div class="callout">
+        <p>
+          The most counterintuitive finding: how much of its GDP a country spends on education was still a
+          statistically significant predictor everywhere it was included &mdash; but it was never one of the
+          <em>most important</em> predictors. Basic economic stability and food security outranked education
+          spending itself. That's a genuinely interesting result for education policy, and it's the kind of thing
+          that warrants more granular follow-up (how money is spent, not just how much).
+        </p>
+      </div>
+      <p>
+        A consistent limitation across all three aims: PISA's own scoring methodology (how raw responses become a
+        proficiency score) isn't fully transparent, which meant relying on country-level aggregates rather than the
+        much richer student-level data actually available. All three models also struggled specifically with
+        countries in the "meets minimum, but nothing more" middle tier &mdash; suggesting the factors that separate
+        strong and weak performers may not be the same factors that separate merely-adequate performers from either
+        end.
+      </p>
+      <p>
+        Proposed future work: use unsupervised learning to build student-level proficiency clusters (rather than
+        country-level aggregates) as a first pass, then re-run this same style of analysis at that more granular
+        level &mdash; combined with more detailed data on how, not just how much, countries spend on education.
+      </p>
+    </section>
+
+    <section id="code">
+      <h2>Code</h2>
+      <p>
+        This was a 3-person team project. The notebooks below cover data preparation and all three aims; each was
+        individually checked to confirm it works only from the pre-aggregated, 81-country dataset before being
+        published here (see the note below).
+      </p>
+      <h3>Data preparation</h3>
+      <ul class="notebook-list">
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/2_PISA_data_by_country.ipynb">2_PISA_data_by_country.ipynb</a><br><span>Rolls up student-level PISA responses to country-level weighted averages and joins in GDP / education-spending data.</span></li>
+      </ul>
+      <h3>Aim 1: Literacy &amp; Math</h3>
+      <ul class="notebook-list">
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/5a_PISA_Continuous_Outcome_Models.ipynb">5a_PISA_Continuous_Outcome_Models.ipynb</a><br><span>Linear regression models predicting average math proficiency from reading proficiency and behavioral variables.</span></li>
+      </ul>
+      <h3>Aim 2: Minimum Proficiency</h3>
+      <ul class="notebook-list">
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/5b_PISA_Binary_Outcome_Models.ipynb">5b_PISA_Binary_Outcome_Models.ipynb</a><br><span>Gaussian Naive Bayes and SVM models classifying countries by minimum math proficiency.</span></li>
+      </ul>
+      <h3>Aim 3: Food Security</h3>
+      <ul class="notebook-list">
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/5c_PISA_Categorical_Outcome_Models.ipynb">5c_PISA_Categorical_Outcome_Models.ipynb</a><br><span>Random Forest and KNN models classifying countries into the three proficiency tiers.</span></li>
+      </ul>
+      <h3>Supplementary EDA</h3>
+      <ul class="notebook-list">
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/3a_PISA_QQ_plots.ipynb">3a_PISA_QQ_plots.ipynb</a><br><span>Normality checks for math/reading/science proficiency scores (source of Figure 2).</span></li>
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/3b_GDP_Percent_GDP_QQ_plots.ipynb">3b_GDP_Percent_GDP_QQ_plots.ipynb</a><br><span>Normality checks for GDP and education-spending variables.</span></li>
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/3c_SES_Mean_All_Normalized_and_QQ.ipynb">3c_SES_Mean_All_Normalized_and_QQ.ipynb</a><br><span>Normalization and normality checks for the socioeconomic status variable.</span></li>
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/4_PISA_Visualizations.ipynb">4_PISA_Visualizations.ipynb</a><br><span>Broader exploratory visualizations across the country-level dataset.</span></li>
+      </ul>
+      <h3>Supporting data</h3>
+      <ul class="notebook-list">
+        <li><a href="PISA_Country_level_data_mathematics.xlsx">PISA_Country_level_data_mathematics.xlsx</a><br><span>Country-level math proficiency data, transcribed from OECD's own published PISA 2022 Results tables.</span></li>
+        <li><a href="PISA_Country_Codes.xlsx">PISA_Country_Codes.xlsx</a><br><span>Lookup table mapping PISA country ID codes to country names.</span></li>
+        <li><a href="PISA2022_Tables_Figures_Links_Volumes1_and_2.xlsx">PISA2022_Tables_Figures_Links_Volumes1_and_2.xlsx</a><br><span>OECD's own index of figure/table references from the official PISA 2022 Results volumes.</span></li>
+        <li><a href="https://github.com/NickMobus/NickMobus.github.io/blob/main/projects/pisa-2022-insights/gdp-per-capita-worldbank.csv">gdp-per-capita-worldbank.csv</a><br><span>GDP per capita by country, World Bank data via Our World in Data.</span></li>
+      </ul>
+      <div class="callout">
+        <p>
+          <strong>A note on data access:</strong> the underlying PISA 2022 student-level microdata (613,744 records)
+          is only available after completing OECD's data-use agreement, which restricts redistribution of the raw
+          file. It isn't included here. One notebook from the original project &mdash; which loaded and previewed
+          that raw student-level file directly &mdash; was deliberately left out of this page rather than published
+          with its outputs stripped, since its content is already fully covered by the data-preparation notebook
+          above. Every notebook published here was individually checked to confirm its saved outputs contain only
+          aggregate, country-level statistics, consistent with what the team's own report and poster present.
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="report-footer">
+    <div class="wrap">
+      <span>CSCI 5502 Data Mining final project &middot; Nick Mobus, Vanessa Thorsten &amp; Sean Fitzgerald</span>
+    </div>
+  </footer>
+
+  <script>
+    const tabs = document.querySelectorAll('.tabs a');
+    const allSections = document.querySelectorAll('section[id]');
+
+    function activate(id) {
+      tabs.forEach(t => t.classList.toggle('active', t.getAttribute('href') === '#' + id));
+      allSections.forEach(s => s.classList.toggle('active', s.id === id));
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = tab.getAttribute('href').slice(1);
+        activate(id);
+        history.replaceState(null, '', '#' + id);
+        window.scrollTo({ top: 0 });
+      });
+    });
+
+    const initial = window.location.hash ? window.location.hash.slice(1) : 'overview';
+    activate(document.getElementById(initial) ? initial : 'overview');
+  </script>
+
+</body>
+</html>

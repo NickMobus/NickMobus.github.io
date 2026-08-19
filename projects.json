@@ -16,5 +16,14 @@
     "date": "2026",
     "link": "projects/neural-dynamic-systems/index.html",
     "external": false
+  },
+  {
+    "title": "Educational Insights with PISA 2022 Datasets",
+    "description": "With Vanessa Thorsten and Sean Fitzgerald — mining OECD PISA 2022 results (613,744 students, 81 countries) with linear regression, Naive Bayes, SVM, Random Forest, and KNN to find what predicts national math proficiency.",
+    "tags": ["Data Mining", "Naive Bayes", "Random Forest", "Education"],
+    "status": "Complete",
+    "date": "2025",
+    "link": "projects/pisa-2022-insights/index.html",
+    "external": false
   }
 ]
