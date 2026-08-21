@@ -3,3 +3,5 @@
 # 105MB student microdata CSV exceeds GitHub's 100MB file limit) and a
 # misplaced, unrelated zip. Not meant to be committed.
 projects/PISA-data-mining/
+#certificates related to accessing mimiciv dataset
+projects/mimiciv/certificates/
